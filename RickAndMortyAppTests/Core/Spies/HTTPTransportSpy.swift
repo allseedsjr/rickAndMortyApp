@@ -1,7 +1,6 @@
 import Foundation
 @testable import RickAndMortyApp
 
-@MainActor
 final class HTTPTransportSpy: HTTPTransport {
     private(set) var receivedRequest: URLRequest?
     var result: Result<HTTPResponse, Error> = .failure(HTTPTransportSpyError.missingStub)
