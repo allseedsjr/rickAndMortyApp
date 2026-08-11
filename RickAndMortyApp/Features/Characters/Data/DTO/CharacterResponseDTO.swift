@@ -1,6 +1,6 @@
 import Foundation
 
-struct CharacterResponseDTO: Decodable {
+struct CharacterResponseDTO: Codable {
     let info: PageInfoDTO
     let results: [CharacterDTO]
 }

@@ -1,6 +1,6 @@
 import Foundation
 
-struct OriginDTO: Decodable {
+struct OriginDTO: Codable {
     let name: String
     let url: String
 }
