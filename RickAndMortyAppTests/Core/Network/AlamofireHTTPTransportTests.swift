@@ -3,7 +3,6 @@ import Testing
 @testable import RickAndMortyApp
 
 @Suite("AlamofireHTTPTransport")
-@MainActor
 final class AlamofireHTTPTransportTests {
     private let sessionSpy = HTTPSessionSpy()
     private lazy var sut = AlamofireHTTPTransport(session: sessionSpy)

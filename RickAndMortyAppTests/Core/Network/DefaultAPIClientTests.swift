@@ -10,7 +10,6 @@ import Testing
 @testable import RickAndMortyApp
 
 @Suite("DefaultAPIClient")
-@MainActor
 final class DefaultAPIClientTests {
     private let baseURL = "https://example.com"
     private let transportSpy = HTTPTransportSpy()
