@@ -1,6 +1,6 @@
 import Foundation
 
-struct LocationDTO: Decodable {
+struct LocationDTO: Codable {
     let name: String
     let url: String
 }

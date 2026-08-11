@@ -1,6 +1,6 @@
 import Foundation
 
-struct CharacterDTO: Decodable {
+struct CharacterDTO: Codable {
     let id: Int
     let name: String
     let status: String
