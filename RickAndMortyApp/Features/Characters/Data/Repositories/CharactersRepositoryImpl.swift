@@ -1,48 +1,28 @@
 final class CharactersRepositoryImpl: CharacterRepositoryProtocol {
-    private let remoteDataSource: CharacterDataSourceProtocol
-    private let localDataSource: CharacterLocalDataSourceProtocol
-    private let cachePolicy: CharacterCachePolicy
-    private let dateProvider: DateProviding
+    private enum CacheKey {
+        static let firstPage = "characters-page-1"
+    }
 
-    init(remoteDataSource: CharacterDataSourceProtocol,
-         localDataSource: CharacterLocalDataSourceProtocol,
-         cachePolicy: CharacterCachePolicy,
-         dateProvider: DateProviding = SystemDateProvider()
+    private let remoteDataSource: CharacterDataSourceProtocol
+    private let cacheLoader: any CacheFirstLoading<CharacterResponseDTO>
+
+    init(
+        remoteDataSource: CharacterDataSourceProtocol,
+        cacheLoader: any CacheFirstLoading<CharacterResponseDTO>
     ) {
         self.remoteDataSource = remoteDataSource
-        self.localDataSource = localDataSource
-        self.cachePolicy = cachePolicy
-        self.dateProvider = dateProvider
+        self.cacheLoader = cacheLoader
     }
 
     func getCharacters(page: Int) async throws -> CharactersPage {
-        if page == 1, let cachedResponse = await loadValidCacheIgnoringFailure() {
-            return CharactersPage(dto: cachedResponse)
+        guard page == 1 else {
+            let response = try await remoteDataSource.getCharacters(page: page)
+            return CharactersPage(dto: response)
         }
 
-        let response = try await remoteDataSource.getCharacters(
-            page: page
-        )
-
-        if page == 1 {
-            try? await localDataSource.saveCharacters(
-                response,
-                createdAt: dateProvider.now
-            )
+        let response = try await cacheLoader.load(key: CacheKey.firstPage) {
+            try await remoteDataSource.getCharacters(page: page)
         }
-
         return CharactersPage(dto: response)
-    }
-
-    private func loadValidCacheIgnoringFailure() async -> CharacterResponseDTO? {
-        guard let entry = try? await localDataSource.loadCharacters(),
-              cachePolicy.isValid(
-                  createdAt: entry.createdAt,
-                  currentDate: dateProvider.now
-              ) else {
-            return nil
-        }
-
-        return entry.response
     }
 }
