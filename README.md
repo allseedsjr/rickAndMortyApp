@@ -4,12 +4,27 @@ An iOS app that lists characters from the Rick and Morty universe and displays d
 
 The project was built with UIKit and View Code, focusing on separation of concerns, testability, and maintainability.
 
-Also, I've been created this board with Jira tickets: 
-https://app.notion.com/p/3b9dfcc8ab5780ec82d4e231e66375fa?v=3b9dfcc8ab578064aa0d000c395a9ce9
-And this Excalidraw:
-https://excalidraw.com/#json=5cj_YstIGP3XWVW15iPnn,5Makz9QRb8MLmebbDmAwiw
+## Problem context
 
-# Requirements
+The goal of this project is to provide a simple and reliable way to browse characters from the Rick and Morty universe and inspect their details.
+
+The app consumes the public Rick and Morty API and handles common mobile application concerns such as pagination, loading states, connectivity failures, local persistence, image loading, search, and navigation.
+
+## Proposed solution
+
+The application provides a paginated character list with local search and a Details screen containing character information and their first episode appearance.
+
+The solution was implemented with UIKit and View Code, using layered architecture and protocol-based dependencies to keep networking, persistence, business rules, presentation, and navigation independently testable.
+
+The first character page and episode responses use a cache-first strategy with a configurable two-minute TTL. Images are cached in memory and on disk. Recoverable errors provide an explicit retry action without discarding content already available on screen.
+
+## Project planning
+
+- [Project board](https://app.notion.com/p/3b9dfcc8ab5780ec82d4e231e66375fa?v=3b9dfcc8ab578064aa0d000c395a9ce9)
+- [Architecture diagrams](https://excalidraw.com/#json=5cj_YstIGP3XWVW15iPnn,5Makz9QRb8MLmebbDmAwiw)
+
+## Requirements
+
 <img width="932" height="727" alt="Screenshot 2026-08-12 at 02 50 19" src="https://github.com/user-attachments/assets/4c702ac8-2751-40da-8404-fc4b72f3d7a4" />
 
 
@@ -133,13 +148,27 @@ Navigation is centralized in `AppCoordinator`.
 
 This keeps push and pop operations outside View Controllers and makes navigation behavior testable. For the current application size, a single coordinator is sufficient. If the number of flows grows, it can be split into child coordinators.
 
-### Retry policy
+### Automatic retry
 
-Automatic retry with exponential backoff was intentionally not added.
+Automatic retry with exponential backoff is not currently implemented.
 
 Retrying every failed request could increase traffic and delay user feedback. Recoverable failures currently expose an explicit retry action, keeping the behavior predictable.
 
 An automatic policy can be introduced later if production requirements show that transient failures are frequent enough to justify it.
+
+## What I would improve with more time
+
+The current scope is functional and covers the proposed character listing and details flows.
+
+With more time, I would:
+
+- Add continuous integration for build and test validation
+- Add UI tests for the main navigation and error-recovery flows
+- Improve accessibility with Dynamic Type and broader VoiceOver validation
+- Add localization using String Catalogs
+- Define a broader minimum iOS version based on product requirements
+- Add observability for networking, cache usage, and failures
+- Evaluate automatic retry with exponential backoff using production metrics
 
 ## Swift Package Manager dependencies
 
