@@ -3,6 +3,7 @@ import UIKit
 
 extension CharacterCellViewModel {
     static func fixture(
+        id: Int = 1,
         name: String = "Rick Sanchez",
         status: String = "Alive",
         species: String = "Human",
@@ -10,6 +11,7 @@ extension CharacterCellViewModel {
         imageURL: URL? = URL(string: "https://example.com/rick.jpeg")
     ) -> CharacterCellViewModel {
         CharacterCellViewModel(
+            id: id,
             name: name,
             status: status,
             species: species,

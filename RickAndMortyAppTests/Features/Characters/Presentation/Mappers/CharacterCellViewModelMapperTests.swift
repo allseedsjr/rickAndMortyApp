@@ -9,6 +9,7 @@ struct CharacterCellViewModelMapperTests {
     @Test
     func testMap_WhenCharacterIsProvided_MapsContent() {
         let character = Character.fixture(
+            id: 42,
             name: "Morty Smith",
             status: "Alive",
             species: "Human",
@@ -17,6 +18,7 @@ struct CharacterCellViewModelMapperTests {
 
         let viewModel = sut.map(character)
 
+        #expect(viewModel.id == 42)
         #expect(viewModel.name == "Morty Smith")
         #expect(viewModel.status == "Alive")
         #expect(viewModel.species == "Human")
