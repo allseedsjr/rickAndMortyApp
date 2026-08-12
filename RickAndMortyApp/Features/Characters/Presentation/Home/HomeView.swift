@@ -1,9 +1,19 @@
 import UIKit
 
-final class HomeView: UIView, ViewCode {
+@MainActor
+protocol HomeViewing: AnyObject {
+    var rootView: UIView { get }
+    var tableView: UITableView { get }
+
+    func setLoading(_ isLoading: Bool)
+    func setPaginationLoading(_ isLoading: Bool)
+}
+
+final class HomeView: UIView, HomeViewing, ViewCode {
     private enum Constants {
         static let rowHeight: CGFloat = 132
         static let verticalContentInset: CGFloat = 8
+        static let paginationIndicatorHeight: CGFloat = 44
     }
 
     let tableView: UITableView = {
@@ -27,9 +37,20 @@ final class HomeView: UIView, ViewCode {
         return tableView
     }()
 
+    var rootView: UIView {
+        self
+    }
+
     private let loadingIndicator: UIActivityIndicatorView = {
         let indicator = UIActivityIndicatorView(style: .large)
         indicator.translatesAutoresizingMaskIntoConstraints = false
+        indicator.color = .white
+        indicator.hidesWhenStopped = true
+        return indicator
+    }()
+
+    private let paginationLoadingIndicator: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView(style: .medium)
         indicator.color = .white
         indicator.hidesWhenStopped = true
         return indicator
@@ -47,7 +68,29 @@ final class HomeView: UIView, ViewCode {
 
     func setLoading(_ isLoading: Bool) {
         tableView.isHidden = isLoading
-        isLoading ? loadingIndicator.startAnimating() : loadingIndicator.stopAnimating()
+
+        if isLoading {
+            loadingIndicator.startAnimating()
+        } else {
+            loadingIndicator.stopAnimating()
+        }
+    }
+
+    func setPaginationLoading(_ isLoading: Bool) {
+        paginationLoadingIndicator.frame = CGRect(
+            x: 0,
+            y: 0,
+            width: tableView.bounds.width,
+            height: Constants.paginationIndicatorHeight
+        )
+
+        if isLoading {
+            tableView.tableFooterView = paginationLoadingIndicator
+            paginationLoadingIndicator.startAnimating()
+        } else {
+            paginationLoadingIndicator.stopAnimating()
+            tableView.tableFooterView = nil
+        }
     }
 
     func setupComponent() {
@@ -61,6 +104,7 @@ final class HomeView: UIView, ViewCode {
             tableView.leadingAnchor.constraint(equalTo: leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: bottomAnchor),
+
             loadingIndicator.centerXAnchor.constraint(equalTo: centerXAnchor),
             loadingIndicator.centerYAnchor.constraint(equalTo: centerYAnchor)
         ])

@@ -10,24 +10,41 @@ enum HomeModuleFactory {
     }
 
     static func make() -> HomeViewController {
-        let transport = AlamofireHTTPTransport(session: Session.default)
+        ImageCacheConfigurator.configure(
+            ttl: CharacterCachePolicy.default.ttl
+        )
+
+        let transport = AlamofireHTTPTransport(
+            session: Session.default
+        )
         let apiClient = DefaultAPIClient(
             baseURL: APIEndpoint.baseURL,
             transport: transport
         )
-        let remoteDataSource = CharacterDataSource(apiClient: apiClient)
-        let dataStore = FileDataStore(fileURL: makeCacheFileURL())
-        let localDataSource = CharacterLocalDataSource(dataStore: dataStore)
+        let remoteDataSource = CharacterDataSource(
+            apiClient: apiClient
+        )
+        let dataStore = FileDataStore(
+            fileURL: makeCacheFileURL()
+        )
+        let localDataSource = CharacterLocalDataSource(
+            dataStore: dataStore
+        )
         let repository = CharactersRepositoryImpl(
             remoteDataSource: remoteDataSource,
             localDataSource: localDataSource,
             cachePolicy: .default
         )
-        let useCase = GetCharactersUseCase(repository: repository)
-        let interactor = HomeInteractor(getCharactersUseCase: useCase)
+        let useCase = GetCharactersUseCase(
+            repository: repository
+        )
+        let interactor = HomeInteractor(
+            getCharactersUseCase: useCase
+        )
         let presenter = HomePresenter(
             interactor: interactor,
-            viewModelMapper: CharacterCellViewModelMapper()
+            viewModelMapper: CharacterCellViewModelMapper(),
+            paginationState: HomePaginationState()
         )
         let viewController = HomeViewController(
             presenter: presenter,

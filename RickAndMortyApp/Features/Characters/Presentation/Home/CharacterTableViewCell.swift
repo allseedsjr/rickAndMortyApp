@@ -1,3 +1,4 @@
+import Kingfisher
 import UIKit
 
 final class CharacterTableViewCell: UITableViewCell, ViewCode {
@@ -42,6 +43,7 @@ final class CharacterTableViewCell: UITableViewCell, ViewCode {
         imageView.layer.cornerCurve = .continuous
         imageView.backgroundColor = .secondarySystemBackground
         imageView.tintColor = .secondaryLabel
+        imageView.kf.indicatorType = .activity
         return imageView
     }()
 
@@ -108,6 +110,7 @@ final class CharacterTableViewCell: UITableViewCell, ViewCode {
 
     override func prepareForReuse() {
         super.prepareForReuse()
+        characterImageView.kf.cancelDownloadTask()
         characterImageView.image = nil
         nameLabel.text = nil
         statusLabel.text = nil
@@ -123,7 +126,15 @@ final class CharacterTableViewCell: UITableViewCell, ViewCode {
         speciesLabel.text = viewModel.species
         statusIndicatorView.backgroundColor = viewModel.statusColor
 
-        characterImageView.image = placeholder
+        guard let imageURL = viewModel.imageURL else {
+            characterImageView.image = placeholder
+            return
+        }
+
+        characterImageView.kf.setImage(
+            with: imageURL,
+            placeholder: placeholder
+        )
     }
 
     func setupComponent() {
