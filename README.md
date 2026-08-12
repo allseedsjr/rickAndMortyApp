@@ -4,6 +4,15 @@ An iOS app that lists characters from the Rick and Morty universe and displays d
 
 The project was built with UIKit and View Code, focusing on separation of concerns, testability, and maintainability.
 
+Also, I've been created this board with Jira tickets: 
+https://app.notion.com/p/3b9dfcc8ab5780ec82d4e231e66375fa?v=3b9dfcc8ab578064aa0d000c395a9ce9
+And this Excalidraw:
+https://excalidraw.com/#json=5cj_YstIGP3XWVW15iPnn,5Makz9QRb8MLmebbDmAwiw
+
+# Requirements
+<img width="932" height="727" alt="Screenshot 2026-08-12 at 02 50 19" src="https://github.com/user-attachments/assets/4c702ac8-2751-40da-8404-fc4b72f3d7a4" />
+
+
 ## Features
 
 - Character listing
