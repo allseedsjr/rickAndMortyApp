@@ -27,6 +27,14 @@ final class HomeView: UIView, ViewCode {
         return tableView
     }()
 
+    private let loadingIndicator: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView(style: .large)
+        indicator.translatesAutoresizingMaskIntoConstraints = false
+        indicator.color = .white
+        indicator.hidesWhenStopped = true
+        return indicator
+    }()
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         setup()
@@ -37,8 +45,14 @@ final class HomeView: UIView, ViewCode {
         return nil
     }
 
+    func setLoading(_ isLoading: Bool) {
+        tableView.isHidden = isLoading
+        isLoading ? loadingIndicator.startAnimating() : loadingIndicator.stopAnimating()
+    }
+
     func setupComponent() {
         addSubview(tableView)
+        addSubview(loadingIndicator)
     }
 
     func setupConstrain() {
@@ -46,7 +60,9 @@ final class HomeView: UIView, ViewCode {
             tableView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
             tableView.leadingAnchor.constraint(equalTo: leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: bottomAnchor)
+            tableView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            loadingIndicator.centerXAnchor.constraint(equalTo: centerXAnchor),
+            loadingIndicator.centerYAnchor.constraint(equalTo: centerYAnchor)
         ])
     }
 
