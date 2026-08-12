@@ -1,3 +1,5 @@
+import Foundation
+
 @MainActor
 protocol HomePresenting {
     func viewDidLoad()
@@ -5,6 +7,7 @@ protocol HomePresenting {
     func loadNextPage()
     func retryNextPage()
     func dismissPaginationError()
+    func searchCharacters(with query: String)
 }
 
 @MainActor
@@ -26,18 +29,23 @@ final class HomePresenter: HomePresenting {
 
     private let interactor: any HomeInteracting
     private let viewModelMapper: any CharacterCellViewModelMapping
+    private let searchFilter: any CharacterSearchFiltering
     private var paginationState: any HomePaginationStateHandling
     private var requestGeneration = 0
     private var charactersTask: Task<Void, Never>?
+    private var characters: [CharacterCellViewModel] = []
+    private var searchQuery = ""
 
     init(
         interactor: any HomeInteracting,
         viewModelMapper: any CharacterCellViewModelMapping,
-        paginationState: any HomePaginationStateHandling
+        paginationState: any HomePaginationStateHandling,
+        searchFilter: any CharacterSearchFiltering
     ) {
         self.interactor = interactor
         self.viewModelMapper = viewModelMapper
         self.paginationState = paginationState
+        self.searchFilter = searchFilter
     }
 
     deinit {
@@ -87,6 +95,11 @@ final class HomePresenter: HomePresenting {
 
     func dismissPaginationError() {
         paginationState.dismissError()
+    }
+
+    func searchCharacters(with query: String) {
+        searchQuery = query
+        showFilteredCharacters()
     }
 
     private func loadCharacters(
@@ -147,10 +160,32 @@ final class HomePresenter: HomePresenting {
             viewModelMapper.map($0)
         }
         if kind.replacesCharacters {
-            view?.showCharacters(viewModels)
+            characters = viewModels
+            showFilteredCharacters()
         } else {
-            view?.appendCharacters(viewModels)
+            characters.append(contentsOf: viewModels)
+
+            if searchQuery.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                view?.appendCharacters(viewModels)
+            } else {
+                showFilteredCharacters()
+            }
         }
+    }
+
+    private func showFilteredCharacters() {
+        let normalizedQuery = searchQuery.trimmingCharacters(
+            in: .whitespacesAndNewlines
+        )
+        let filteredCharacters = searchFilter.filter(
+            characters,
+            by: normalizedQuery
+        )
+
+        view?.showCharacters(filteredCharacters)
+        view?.showSearchEmptyState(
+            !normalizedQuery.isEmpty && filteredCharacters.isEmpty
+        )
     }
 
     private func handleFailure(

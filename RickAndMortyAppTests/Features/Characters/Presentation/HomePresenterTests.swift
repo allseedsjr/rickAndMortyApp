@@ -8,12 +8,14 @@ final class HomePresenterTests {
     private let mapperSpy = CharacterCellViewModelMapperSpy()
     private let paginationStateSpy = HomePaginationStateSpy()
     private let viewSpy = HomeDisplaySpy()
+    private let searchFilterSpy = CharacterSearchFilterSpy()
 
     private lazy var sut: HomePresenter = {
         let presenter = HomePresenter(
             interactor: interactorSpy,
             viewModelMapper: mapperSpy,
-            paginationState: paginationStateSpy
+            paginationState: paginationStateSpy,
+            searchFilter: searchFilterSpy
         )
         presenter.view = viewSpy
         return presenter
@@ -158,6 +160,115 @@ final class HomePresenterTests {
         #expect(viewSpy.shownCharacters.isEmpty)
         #expect(viewSpy.appendedCharacters.isEmpty)
         #expect(paginationStateSpy.receivedFinishedPages.isEmpty)
+    }
+
+    @Test
+    func testSearchCharacters_FiltersLoadedCharactersAndUpdatesView() async {
+        interactorSpy.result = .success(.fixture(characters: [.fixture()]))
+        searchFilterSpy.result = [.fixture(name: "Rick Sanchez")]
+
+        await waitForCharactersToBeShown {
+            sut.viewDidLoad()
+        }
+
+        sut.searchCharacters(with: "rick")
+
+        #expect(searchFilterSpy.receivedQueries.last == "rick")
+        #expect(searchFilterSpy.receivedCharacters.last?.count == 1)
+        #expect(viewSpy.shownCharacters.last?.first?.name == "Rick Sanchez")
+        #expect(viewSpy.searchEmptyStateVisibility.last == false)
+    }
+
+    @Test
+    func testLoadNextPage_WithActiveSearch_RefreshesFilteredCharacters() async {
+        interactorSpy.result = .success(.fixture(characters: [.fixture()]))
+        searchFilterSpy.result = [.fixture(name: "Filtered character")]
+
+        await waitForCharactersToBeShown {
+            sut.viewDidLoad()
+        }
+        sut.searchCharacters(with: "rick")
+
+        await waitForCharactersToBeShown {
+            sut.loadNextPage()
+        }
+
+        #expect(viewSpy.appendedCharacters.isEmpty)
+        #expect(searchFilterSpy.receivedQueries.last == "rick")
+        #expect(searchFilterSpy.receivedCharacters.last?.count == 2)
+        #expect(viewSpy.shownCharacters.last?.first?.name == "Filtered character")
+        #expect(viewSpy.searchEmptyStateVisibility.last == false)
+    }
+
+    @Test
+    func testSearchCharacters_WhenNoCharacterMatches_ShowsEmptyState() async {
+        interactorSpy.result = .success(.fixture(characters: [.fixture()]))
+
+        await waitForCharactersToBeShown {
+            sut.viewDidLoad()
+        }
+        searchFilterSpy.result = []
+
+        sut.searchCharacters(with: "unknown character")
+
+        #expect(viewSpy.shownCharacters.last?.isEmpty == true)
+        #expect(viewSpy.searchEmptyStateVisibility.last == true)
+    }
+
+    @Test
+    func testSearchCharacters_WhenQueryIsCleared_HidesEmptyState() async {
+        interactorSpy.result = .success(.fixture(characters: [.fixture()]))
+
+        await waitForCharactersToBeShown {
+            sut.viewDidLoad()
+        }
+
+        sut.searchCharacters(with: "")
+
+        #expect(viewSpy.searchEmptyStateVisibility.last == false)
+    }
+
+    @Test
+    func testSearchCharacters_NormalizesQueryBeforeFiltering() async {
+        interactorSpy.result = .success(.fixture(characters: [.fixture()]))
+
+        await waitForCharactersToBeShown {
+            sut.viewDidLoad()
+        }
+
+        sut.searchCharacters(with: "  Rick  ")
+
+        #expect(searchFilterSpy.receivedQueries.last == "Rick")
+    }
+
+    @Test
+    func testViewDidLoad_WhenCharactersAreEmptyAndThereIsNoSearch_DoesNotShowEmptySearchState() async {
+        interactorSpy.result = .success(.fixture(characters: []))
+
+        await waitForCharactersToBeShown {
+            sut.viewDidLoad()
+        }
+
+        #expect(viewSpy.shownCharacters.last?.isEmpty == true)
+        #expect(viewSpy.searchEmptyStateVisibility.last == false)
+    }
+
+    @Test
+    func testLoadNextPage_WithActiveSearchAndNoMatch_ShowsEmptyState() async {
+        interactorSpy.result = .success(.fixture(characters: [.fixture()]))
+
+        await waitForCharactersToBeShown {
+            sut.viewDidLoad()
+        }
+        searchFilterSpy.result = []
+        sut.searchCharacters(with: "Birdperson")
+
+        await waitForCharactersToBeShown {
+            sut.loadNextPage()
+        }
+
+        #expect(viewSpy.searchEmptyStateVisibility.last == true)
+        #expect(viewSpy.shownCharacters.last?.isEmpty == true)
     }
 
     private func waitForCharactersToBeShown(perform: () -> Void) async {

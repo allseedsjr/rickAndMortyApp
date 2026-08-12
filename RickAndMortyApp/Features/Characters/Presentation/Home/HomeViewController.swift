@@ -5,6 +5,7 @@ protocol HomeDisplaying: AnyObject {
     func showLoading()
     func showCharacters(_ characters: [CharacterCellViewModel])
     func appendCharacters(_ characters: [CharacterCellViewModel])
+    func showSearchEmptyState(_ isVisible: Bool)
     func showPaginationLoading(_ isLoading: Bool)
     func showPaginationError(message: String)
     func showError(message: String)
@@ -46,6 +47,7 @@ final class HomeViewController: UIViewController {
         homeView.tableView.dataSource = self
         homeView.tableView.delegate = self
         homeView.tableView.prefetchDataSource = self
+        searchController.searchResultsUpdater = self
         setupContent()
         setupNavigationBar()
         setupSearchController()
