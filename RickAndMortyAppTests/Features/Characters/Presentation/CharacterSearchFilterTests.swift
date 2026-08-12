@@ -8,8 +8,8 @@ struct CharacterSearchFilterTests {
     @Test
     func testFilter_WhenQueryMatchesName_ReturnsMatchingCharacters() {
         let characters = [
-            CharacterCellViewModel.fixture(name: "Rick Sanchez"),
-            CharacterCellViewModel.fixture(name: "Morty Smith")
+            Character.fixture(name: "Rick Sanchez"),
+            Character.fixture(name: "Morty Smith")
         ]
 
         let result = sut.filter(characters, by: "rick")
@@ -20,7 +20,7 @@ struct CharacterSearchFilterTests {
 
     @Test
     func testFilter_WhenQueryHasDifferentCase_ReturnsMatchingCharacters() {
-        let characters = [CharacterCellViewModel.fixture(name: "Summer Smith")]
+        let characters = [Character.fixture(name: "Summer Smith")]
 
         let result = sut.filter(characters, by: "SUMMER")
 
@@ -29,7 +29,7 @@ struct CharacterSearchFilterTests {
 
     @Test
     func testFilter_WhenQueryContainsSurroundingWhitespace_IgnoresWhitespace() {
-        let characters = [CharacterCellViewModel.fixture(name: "Beth Smith")]
+        let characters = [Character.fixture(name: "Beth Smith")]
 
         let result = sut.filter(characters, by: "  Beth  ")
 
@@ -39,8 +39,8 @@ struct CharacterSearchFilterTests {
     @Test
     func testFilter_WhenQueryIsEmpty_ReturnsAllCharacters() {
         let characters = [
-            CharacterCellViewModel.fixture(name: "Rick Sanchez"),
-            CharacterCellViewModel.fixture(name: "Morty Smith")
+            Character.fixture(name: "Rick Sanchez"),
+            Character.fixture(name: "Morty Smith")
         ]
 
         let result = sut.filter(characters, by: "   ")
@@ -50,7 +50,7 @@ struct CharacterSearchFilterTests {
 
     @Test
     func testFilter_WhenQueryDoesNotMatch_ReturnsEmptyList() {
-        let characters = [CharacterCellViewModel.fixture(name: "Jerry Smith")]
+        let characters = [Character.fixture(name: "Jerry Smith")]
 
         let result = sut.filter(characters, by: "Birdperson")
 
@@ -67,8 +67,8 @@ struct CharacterSearchFilterTests {
     @Test
     func testFilter_WhenQueryMatchesPartOfName_ReturnsMatchingCharacters() {
         let characters = [
-            CharacterCellViewModel.fixture(name: "Evil Morty"),
-            CharacterCellViewModel.fixture(name: "Jerry Smith")
+            Character.fixture(name: "Evil Morty"),
+            Character.fixture(name: "Jerry Smith")
         ]
 
         let result = sut.filter(characters, by: "Mort")
