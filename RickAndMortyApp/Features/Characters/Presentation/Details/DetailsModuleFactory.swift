@@ -3,6 +3,20 @@ import UIKit
 
 @MainActor
 enum DetailsModuleFactory {
+    private enum Strings {
+        static let cacheDirectory = "RickAndMortyApp"
+        static let cacheFile = "episodes.json"
+    }
+
+    private static let episodeCacheLoader: CacheFirstLoader<EpisodeDTO> = {
+        let dataStore = FileDataStore(fileURL: makeCacheFileURL())
+        let cacheStore = CodableCacheStore<EpisodeDTO>(dataStore: dataStore)
+        return CacheFirstLoader(
+            store: cacheStore,
+            policy: .default
+        )
+    }()
+
     static func make(
         character: Character,
         router: any DetailsRouting
@@ -12,8 +26,11 @@ enum DetailsModuleFactory {
             baseURL: APIEndpoint.baseURL,
             transport: transport
         )
-        let dataSource = EpisodeDataSource(apiClient: apiClient)
-        let repository = EpisodeRepositoryImpl(dataSource: dataSource)
+        let remoteDataSource = EpisodeDataSource(apiClient: apiClient)
+        let repository = EpisodeRepositoryImpl(
+            remoteDataSource: remoteDataSource,
+            cacheLoader: episodeCacheLoader
+        )
         let useCase = GetFirstSeenInUseCase(repository: repository)
         let interactor = DetailsInteractor(getFirstSeenInUseCase: useCase)
         let presenter = DetailsPresenter(
@@ -29,5 +46,16 @@ enum DetailsModuleFactory {
         )
         presenter.view = viewController
         return viewController
+    }
+
+    private static func makeCacheFileURL() -> URL {
+        let cacheURL = FileManager.default.urls(
+            for: .cachesDirectory,
+            in: .userDomainMask
+        ).first ?? FileManager.default.temporaryDirectory
+
+        return cacheURL
+            .appendingPathComponent(Strings.cacheDirectory)
+            .appendingPathComponent(Strings.cacheFile)
     }
 }
