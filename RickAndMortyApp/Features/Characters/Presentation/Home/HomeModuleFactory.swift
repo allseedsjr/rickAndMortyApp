@@ -44,7 +44,8 @@ enum HomeModuleFactory {
         let presenter = HomePresenter(
             interactor: interactor,
             viewModelMapper: CharacterCellViewModelMapper(),
-            paginationState: HomePaginationState()
+            paginationState: HomePaginationState(),
+            searchFilter: CharacterSearchFilter()
         )
         let viewController = HomeViewController(
             presenter: presenter,

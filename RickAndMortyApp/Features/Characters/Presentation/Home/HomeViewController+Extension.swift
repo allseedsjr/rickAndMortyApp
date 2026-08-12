@@ -18,6 +18,7 @@ extension HomeViewController: HomeDisplaying {
         isInitialLoading = true
         isPaginationLoading = false
         homeView.setLoading(true)
+        homeView.setSearchEmptyState(false)
     }
 
     func showCharacters(_ characters: [CharacterCellViewModel]) {
@@ -39,6 +40,10 @@ extension HomeViewController: HomeDisplaying {
 
         self.characters.append(contentsOf: characters)
         homeView.tableView.reloadData()
+    }
+
+    func showSearchEmptyState(_ isVisible: Bool) {
+        homeView.setSearchEmptyState(isVisible)
     }
 
     func showPaginationLoading(_ isLoading: Bool) {
@@ -136,7 +141,10 @@ extension HomeViewController: UITableViewDataSourcePrefetching {
         prefetchRowsAt indexPaths: [IndexPath]
     ) {
         guard !isInitialLoading,
-              !characters.isEmpty else {
+              !characters.isEmpty,
+              searchController.searchBar.text?
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+                .isEmpty != false else {
             return
         }
 
@@ -156,6 +164,14 @@ extension HomeViewController: UISearchBarDelegate {
 
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         searchBar.resignFirstResponder()
+    }
+}
+
+extension HomeViewController: UISearchResultsUpdating {
+    func updateSearchResults(for searchController: UISearchController) {
+        presenter.searchCharacters(
+            with: searchController.searchBar.text ?? ""
+        )
     }
 }
 
