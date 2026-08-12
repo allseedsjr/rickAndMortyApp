@@ -1,4 +1,4 @@
-struct EpisodeDTO: Decodable {
+struct EpisodeDTO: Codable {
     let id: Int
     let name: String
     let episode: String
