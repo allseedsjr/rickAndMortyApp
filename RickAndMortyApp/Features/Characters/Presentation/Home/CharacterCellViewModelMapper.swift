@@ -12,6 +12,7 @@ struct CharacterCellViewModelMapper: CharacterCellViewModelMapping {
 
     func map(_ character: Character) -> CharacterCellViewModel {
         CharacterCellViewModel(
+            id: character.id,
             name: character.name,
             status: character.status,
             species: character.species,

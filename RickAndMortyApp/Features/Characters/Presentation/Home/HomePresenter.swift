@@ -8,6 +8,7 @@ protocol HomePresenting {
     func retryNextPage()
     func dismissPaginationError()
     func searchCharacters(with query: String)
+    func didSelectCharacter(id: Int)
 }
 
 @MainActor
@@ -27,6 +28,7 @@ final class HomePresenter: HomePresenting {
     private let viewModelMapper: any CharacterCellViewModelMapping
     private let searchFilter: any CharacterSearchFiltering
     private let errorMapper: any ErrorViewModelMapping
+    private let router: any HomeRouting
     private var paginationState: any HomePaginationStateHandling
     private var requestGeneration = 0
     private var charactersTask: Task<Void, Never>?
@@ -38,13 +40,15 @@ final class HomePresenter: HomePresenting {
         viewModelMapper: any CharacterCellViewModelMapping,
         paginationState: any HomePaginationStateHandling,
         searchFilter: any CharacterSearchFiltering,
-        errorMapper: any ErrorViewModelMapping
+        errorMapper: any ErrorViewModelMapping,
+        router: any HomeRouting
     ) {
         self.interactor = interactor
         self.viewModelMapper = viewModelMapper
         self.paginationState = paginationState
         self.searchFilter = searchFilter
         self.errorMapper = errorMapper
+        self.router = router
     }
 
     deinit {
@@ -99,6 +103,14 @@ final class HomePresenter: HomePresenting {
     func searchCharacters(with query: String) {
         searchQuery = query
         showFilteredCharacters()
+    }
+
+    func didSelectCharacter(id: Int) {
+        guard let character = characters.first(where: { $0.id == id }) else {
+            return
+        }
+
+        router.showDetails(for: character)
     }
 
     private func loadCharacters(

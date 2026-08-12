@@ -41,12 +41,14 @@ enum HomeModuleFactory {
         let interactor = HomeInteractor(
             getCharactersUseCase: useCase
         )
+        let router = HomeRouter()
         let presenter = HomePresenter(
             interactor: interactor,
             viewModelMapper: CharacterCellViewModelMapper(),
             paginationState: HomePaginationState(),
             searchFilter: CharacterSearchFilter(),
-            errorMapper: ErrorViewModelMapper()
+            errorMapper: ErrorViewModelMapper(),
+            router: router
         )
         let viewController = HomeViewController(
             presenter: presenter,
@@ -54,6 +56,7 @@ enum HomeModuleFactory {
         )
 
         presenter.view = viewController
+        router.viewController = viewController
         return viewController
     }
 

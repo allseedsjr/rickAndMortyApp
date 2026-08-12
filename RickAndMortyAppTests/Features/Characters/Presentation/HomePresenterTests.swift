@@ -10,6 +10,7 @@ final class HomePresenterTests {
     private let viewSpy = HomeDisplaySpy()
     private let searchFilterSpy = CharacterSearchFilterSpy()
     private let errorMapperSpy = ErrorViewModelMapperSpy()
+    private let routerSpy = HomeRouterSpy()
 
     private lazy var sut: HomePresenter = {
         let presenter = HomePresenter(
@@ -17,7 +18,8 @@ final class HomePresenterTests {
             viewModelMapper: mapperSpy,
             paginationState: paginationStateSpy,
             searchFilter: searchFilterSpy,
-            errorMapper: errorMapperSpy
+            errorMapper: errorMapperSpy,
+            router: routerSpy
         )
         presenter.view = viewSpy
         return presenter
@@ -287,6 +289,27 @@ final class HomePresenterTests {
 
         #expect(viewSpy.searchEmptyStateVisibility.last == true)
         #expect(viewSpy.shownCharacters.last?.isEmpty == true)
+    }
+
+    @Test
+    func testDidSelectCharacter_WhenCharacterIsLoaded_RoutesCompleteCharacter() async {
+        let character = Character.fixture(id: 42, name: "Beth Smith")
+        interactorSpy.result = .success(.fixture(characters: [character]))
+
+        await waitForCharactersToBeShown {
+            sut.viewDidLoad()
+        }
+
+        sut.didSelectCharacter(id: 42)
+
+        #expect(routerSpy.receivedCharacters == [character])
+    }
+
+    @Test
+    func testDidSelectCharacter_WhenIDIsUnknown_DoesNotRoute() {
+        sut.didSelectCharacter(id: 999)
+
+        #expect(routerSpy.receivedCharacters.isEmpty)
     }
 
     private func waitForCharactersToBeShown(perform: () -> Void) async {
