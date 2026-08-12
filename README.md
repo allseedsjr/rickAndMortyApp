@@ -12,7 +12,8 @@ The project was built with UIKit and View Code, focusing on separation of concer
 - Empty state when no characters are found
 - Character details
 - First appearance information fetched from the episode API
-- Local cache with a configurable TTL
+- Local cache for the first character page and episode details
+- Configurable cache TTL
 - Disk image caching
 - Loading and error states
 - Retry support for recoverable errors
@@ -48,18 +49,20 @@ This structure allows networking tests to run without performing real HTTP reque
 
 ## Local cache
 
-Only the first page of characters is persisted locally.
+The app uses a reusable cache-first infrastructure backed by JSON files in the application cache directory.
 
-When the app starts:
+For each cacheable request:
 
-1. The repository checks for valid cached data.
-2. If the cache is valid, the local response is returned.
-3. If the cache is missing or expired, the API is called.
-4. The remote response is persisted and returned.
+1. The repository asks the cache-first loader for an entry.
+2. If the entry exists and its TTL is valid, the cached response is returned.
+3. If the entry is missing or expired, the API is called.
+4. The remote response is persisted with its creation date and returned.
 
-The cache has a configurable TTL, currently set to two minutes.
+The TTL is configurable and currently set to two minutes. Cache read and write failures do not prevent remote data from being displayed.
 
-Persisting only the first page improves the initial loading experience while keeping the cache small and predictable. Additional pages are loaded remotely through pagination.
+Only the first page of characters is cached. Additional pages remain remote-only to avoid pagination invalidation and ordering complexity.
+
+Episode responses used by the Details screen are also cached, using the episode ID as the key. The episode store is shared between Details screens so concurrent writes remain serialized.
 
 ## Error handling
 
@@ -73,11 +76,11 @@ On the Details screen, an episode request failure affects only the “First seen
 
 ### File-based cache
 
-The first page of characters is persisted as a JSON file in the application cache directory.
+Character and episode responses are persisted as JSON files in the application cache directory.
 
-This approach was selected because the cached response is small, replaceable, and does not require queries, relationships, migrations, or partial updates.
+This approach was selected because the cached payloads are small, replaceable, and do not require queries, relationships, migrations, or partial updates.
 
-Alternatives such as Core Data or SwiftData would provide more advanced persistence capabilities, but would add unnecessary complexity for a single cached response with a short TTL.
+Alternatives such as Core Data or SwiftData would provide more advanced persistence capabilities, but would add unnecessary complexity for short-lived API responses.
 
 The file cache is not treated as a permanent source of truth. The operating system may remove it, and the app must always be able to fetch the data again.
 
@@ -91,7 +94,7 @@ Pagination therefore remains remote-only.
 
 ### Configurable TTL
 
-The character cache uses a configurable TTL, currently set to two minutes.
+The cache infrastructure uses a configurable TTL, currently set to two minutes.
 
 A short TTL improves the initial loading experience without keeping potentially outdated data for too long. The TTL is injected into the cache policy, allowing it to change without modifying repository behavior.
 
@@ -101,11 +104,11 @@ Search is performed against the characters already loaded in memory.
 
 This avoids additional network requests and provides immediate feedback. The trade-off is that search results are limited to the pages loaded during the current session rather than the complete remote character catalog.
 
-### Episode request on Details
+### Episode request and persistence on Details
 
 Most character information is passed from Home to Details. Only the first episode information is fetched remotely.
 
-This prevents an unnecessary character request when opening Details while still retrieving the episode name, code, and air date from their source endpoint.
+This prevents an unnecessary character request when opening Details while still retrieving the episode name, code, and air date from their source endpoint. Episode responses are cached by ID and reused while their TTL remains valid.
 
 If the episode request fails, the remaining character information stays available.
 
@@ -181,7 +184,7 @@ The test suite covers:
 - HTTP transport and API client
 - Data Sources and repositories
 - DTO-to-domain mapping
-- Cache behavior and expiration
+- Cache behavior, expiration, and concurrent writes
 - Use Cases and Interactors
 - Presenters and View Model mappers
 - Search and pagination
