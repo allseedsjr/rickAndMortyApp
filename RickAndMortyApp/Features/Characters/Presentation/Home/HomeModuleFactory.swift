@@ -11,7 +11,7 @@ enum HomeModuleFactory {
 
     static func make(router: any HomeRouting) -> HomeViewController {
         ImageCacheConfigurator.configure(
-            ttl: CharacterCachePolicy.default.ttl
+            ttl: CachePolicy.default.ttl
         )
 
         let transport = AlamofireHTTPTransport(
@@ -27,13 +27,16 @@ enum HomeModuleFactory {
         let dataStore = FileDataStore(
             fileURL: makeCacheFileURL()
         )
-        let localDataSource = CharacterLocalDataSource(
+        let cacheStore = CodableCacheStore<CharacterResponseDTO>(
             dataStore: dataStore
+        )
+        let cacheLoader = CacheFirstLoader(
+            store: cacheStore,
+            policy: .default
         )
         let repository = CharactersRepositoryImpl(
             remoteDataSource: remoteDataSource,
-            localDataSource: localDataSource,
-            cachePolicy: .default
+            cacheLoader: cacheLoader
         )
         let useCase = GetCharactersUseCase(
             repository: repository

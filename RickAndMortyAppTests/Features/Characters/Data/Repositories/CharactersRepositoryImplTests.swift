@@ -1,134 +1,53 @@
-import Foundation
 import Testing
 @testable import RickAndMortyApp
 
-@Suite("CharactersRepositoryImpl", .serialized)
+@Suite("CharactersRepositoryImpl")
 final class CharactersRepositoryImplTests {
     private let remoteDataSourceSpy = CharacterDataSourceSpy()
-    private let localDataSourceSpy = CharacterLocalDataSourceSpy()
-    private let dateProviderStub = DateProviderStub(
-        now: Date(timeIntervalSince1970: 1_000)
-    )
+    private let cacheLoaderSpy = CacheFirstLoaderSpy<CharacterResponseDTO>()
     private lazy var sut = CharactersRepositoryImpl(
         remoteDataSource: remoteDataSourceSpy,
-        localDataSource: localDataSourceSpy,
-        cachePolicy: CharacterCachePolicy(ttl: 120),
-        dateProvider: dateProviderStub
+        cacheLoader: cacheLoaderSpy
     )
 
     @Test
-    func testGetCharacters_WhenFirstPageCacheIsValid_ReturnsCachedPage() async throws {
-        localDataSourceSpy.loadResult = .success(
-            .fixture(
-                response: .fixture(
-                    results: [.fixture(id: 7, name: "Cached Squanchy")]
-                ),
-                createdAt: dateProviderStub.now.addingTimeInterval(-119)
-            )
-        )
-
-        let page = try await sut.getCharacters(page: 1)
-
-        #expect(page.characters.first?.id == 7)
-        #expect(page.characters.first?.name == "Cached Squanchy")
-        #expect(remoteDataSourceSpy.receivedPages.isEmpty)
-        #expect(localDataSourceSpy.receivedResponses.isEmpty)
-    }
-
-    @Test
-    func testGetCharacters_WhenFirstPageCacheDoesNotExist_FetchesAndSavesRemoteResponse() async throws {
-        let response = CharacterResponseDTO.fixture(
-            results: [.fixture(id: 8, name: "Remote Morty")]
-        )
-        localDataSourceSpy.loadResult = .success(nil)
-        remoteDataSourceSpy.result = .success(response)
-
-        let page = try await sut.getCharacters(page: 1)
-
-        #expect(remoteDataSourceSpy.receivedPages == [1])
-        #expect(page.characters.first?.id == 8)
-        #expect(page.characters.first?.name == "Remote Morty")
-        #expect(localDataSourceSpy.receivedResponses.first?.results.first?.id == 8)
-        #expect(localDataSourceSpy.receivedCreationDates == [dateProviderStub.now])
-    }
-
-    @Test
-    func testGetCharacters_WhenFirstPageCacheIsExpired_FetchesAndReplacesCache() async throws {
-        localDataSourceSpy.loadResult = .success(
-            .fixture(
-                response: .fixture(results: [.fixture(id: 1, name: "Stale Rick")]),
-                createdAt: dateProviderStub.now.addingTimeInterval(-120)
-            )
-        )
-        remoteDataSourceSpy.result = .success(
-            .fixture(results: [.fixture(id: 2, name: "Fresh Morty")])
-        )
-
-        let page = try await sut.getCharacters(page: 1)
-
-        #expect(remoteDataSourceSpy.receivedPages == [1])
-        #expect(page.characters.first?.id == 2)
-        #expect(page.characters.first?.name == "Fresh Morty")
-        #expect(localDataSourceSpy.receivedResponses.count == 1)
-        #expect(localDataSourceSpy.receivedResponses.first?.results.first?.id == 2)
-    }
-
-    @Test
-    func testGetCharacters_WhenCacheLoadingFails_FetchesRemoteResponse() async throws {
-        localDataSourceSpy.loadResult = .failure(
-            CharactersRepositoryImplTestError.localFailure
-        )
-        remoteDataSourceSpy.result = .success(.fixture())
+    func testGetCharacters_WhenPageIsFirst_UsesFirstPageCacheKey() async throws {
+        cacheLoaderSpy.result = .success(.fixture())
 
         _ = try await sut.getCharacters(page: 1)
 
-        #expect(remoteDataSourceSpy.receivedPages == [1])
+        #expect(cacheLoaderSpy.receivedKeys == ["characters-page-1"])
+        #expect(remoteDataSourceSpy.receivedPages.isEmpty)
     }
 
     @Test
-    func testGetCharacters_WhenCacheSavingFails_ReturnsRemotePage() async throws {
-        localDataSourceSpy.loadResult = .success(nil)
-        localDataSourceSpy.saveError = CharactersRepositoryImplTestError.localFailure
+    func testGetCharacters_WhenFirstPageRequiresRemote_FetchesAndMapsResponse() async throws {
         remoteDataSourceSpy.result = .success(
-            .fixture(results: [.fixture(id: 2, name: "Morty Smith")])
+            .fixture(results: [.fixture(id: 7, name: "Squanchy")])
         )
 
-        let page = try await sut.getCharacters(page: 1)
+        let result = try await sut.getCharacters(page: 1)
 
-        #expect(page.characters.first?.id == 2)
-        #expect(page.characters.first?.name == "Morty Smith")
-        #expect(localDataSourceSpy.receivedResponses.count == 1)
+        #expect(remoteDataSourceSpy.receivedPages == [1])
+        #expect(result.characters.first?.name == "Squanchy")
     }
 
     @Test
-    func testGetCharacters_WhenCacheIsExpiredAndRemoteFails_PropagatesRemoteError() async {
-        localDataSourceSpy.loadResult = .success(
-            .fixture(
-                createdAt: dateProviderStub.now.addingTimeInterval(-121)
-            )
-        )
-        remoteDataSourceSpy.result = .failure(AppError.timeout)
-
-        await #expect(throws: AppError.timeout) {
-            try await sut.getCharacters(page: 1)
-        }
-
-        #expect(localDataSourceSpy.receivedResponses.isEmpty)
-    }
-
-    @Test
-    func testGetCharacters_WhenPageIsAfterFirst_BypassesCacheAndDoesNotSave() async throws {
-        localDataSourceSpy.loadResult = .success(.fixture())
+    func testGetCharacters_WhenPageIsAfterFirst_BypassesCache() async throws {
         remoteDataSourceSpy.result = .success(.fixture())
 
-        _ = try await sut.getCharacters(page: 3)
+        _ = try await sut.getCharacters(page: 2)
 
-        #expect(remoteDataSourceSpy.receivedPages == [3])
-        #expect(localDataSourceSpy.loadCallCount == 0)
-        #expect(localDataSourceSpy.receivedResponses.isEmpty)
+        #expect(cacheLoaderSpy.receivedKeys.isEmpty)
+        #expect(remoteDataSourceSpy.receivedPages == [2])
     }
-}
 
-private enum CharactersRepositoryImplTestError: Error {
-    case localFailure
+    @Test
+    func testGetCharacters_WhenLoaderFails_PropagatesError() async {
+        cacheLoaderSpy.result = .failure(AppError.noConnection)
+
+        await #expect(throws: AppError.noConnection) {
+            try await sut.getCharacters(page: 1)
+        }
+    }
 }
