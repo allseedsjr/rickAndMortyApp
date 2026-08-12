@@ -12,10 +12,6 @@ protocol HomePresenting {
 
 @MainActor
 final class HomePresenter: HomePresenting {
-    private enum Strings {
-        static let genericError = "Unable to load characters. Please try again."
-    }
-
     private enum LoadingKind {
         case initial
         case pagination
@@ -30,6 +26,7 @@ final class HomePresenter: HomePresenting {
     private let interactor: any HomeInteracting
     private let viewModelMapper: any CharacterCellViewModelMapping
     private let searchFilter: any CharacterSearchFiltering
+    private let errorMapper: any ErrorViewModelMapping
     private var paginationState: any HomePaginationStateHandling
     private var requestGeneration = 0
     private var charactersTask: Task<Void, Never>?
@@ -40,12 +37,14 @@ final class HomePresenter: HomePresenting {
         interactor: any HomeInteracting,
         viewModelMapper: any CharacterCellViewModelMapping,
         paginationState: any HomePaginationStateHandling,
-        searchFilter: any CharacterSearchFiltering
+        searchFilter: any CharacterSearchFiltering,
+        errorMapper: any ErrorViewModelMapping
     ) {
         self.interactor = interactor
         self.viewModelMapper = viewModelMapper
         self.paginationState = paginationState
         self.searchFilter = searchFilter
+        self.errorMapper = errorMapper
     }
 
     deinit {
@@ -132,6 +131,7 @@ final class HomePresenter: HomePresenting {
                 }
 
                 self?.handleFailure(
+                    error,
                     generation: generation,
                     kind: kind
                 )
@@ -189,6 +189,7 @@ final class HomePresenter: HomePresenting {
     }
 
     private func handleFailure(
+        _ error: any Error,
         generation: Int,
         kind: LoadingKind
     ) {
@@ -198,13 +199,14 @@ final class HomePresenter: HomePresenting {
 
         charactersTask = nil
         let wasPagination = kind == .pagination
+        let errorViewModel = errorMapper.map(error)
         paginationState.fail(wasPagination: wasPagination)
         view?.showPaginationLoading(false)
 
         if wasPagination {
-            view?.showPaginationError(message: Strings.genericError)
+            view?.showPaginationError(errorViewModel)
         } else {
-            view?.showError(message: Strings.genericError)
+            view?.showError(errorViewModel)
         }
     }
 
