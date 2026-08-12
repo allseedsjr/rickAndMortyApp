@@ -30,7 +30,7 @@ final class HomePresenter: HomePresenting {
     private var paginationState: any HomePaginationStateHandling
     private var requestGeneration = 0
     private var charactersTask: Task<Void, Never>?
-    private var characters: [CharacterCellViewModel] = []
+    private var characters: [Character] = []
     private var searchQuery = ""
 
     init(
@@ -156,16 +156,16 @@ final class HomePresenter: HomePresenting {
             hasNextPage: charactersPage.hasNextPage
         )
 
-        let viewModels = charactersPage.characters.map {
-            viewModelMapper.map($0)
-        }
         if kind.replacesCharacters {
-            characters = viewModels
+            characters = charactersPage.characters
             showFilteredCharacters()
         } else {
-            characters.append(contentsOf: viewModels)
+            characters.append(contentsOf: charactersPage.characters)
 
             if searchQuery.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                let viewModels = charactersPage.characters.map {
+                    viewModelMapper.map($0)
+                }
                 view?.appendCharacters(viewModels)
             } else {
                 showFilteredCharacters()
@@ -177,8 +177,11 @@ final class HomePresenter: HomePresenting {
         let normalizedQuery = searchQuery.trimmingCharacters(
             in: .whitespacesAndNewlines
         )
+        let viewModels = characters.map {
+            viewModelMapper.map($0)
+        }
         let filteredCharacters = searchFilter.filter(
-            characters,
+            viewModels,
             by: normalizedQuery
         )
 
