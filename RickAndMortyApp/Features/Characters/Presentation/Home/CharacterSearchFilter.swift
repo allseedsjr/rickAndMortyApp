@@ -2,16 +2,16 @@ import Foundation
 
 protocol CharacterSearchFiltering {
     func filter(
-        _ characters: [CharacterCellViewModel],
+        _ characters: [Character],
         by query: String
-    ) -> [CharacterCellViewModel]
+    ) -> [Character]
 }
 
 struct CharacterSearchFilter: CharacterSearchFiltering {
     func filter(
-        _ characters: [CharacterCellViewModel],
+        _ characters: [Character],
         by query: String
-    ) -> [CharacterCellViewModel] {
+    ) -> [Character] {
         let normalizedQuery = query.trimmingCharacters(
             in: .whitespacesAndNewlines
         )

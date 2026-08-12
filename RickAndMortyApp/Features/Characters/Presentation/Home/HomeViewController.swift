@@ -1,14 +1,15 @@
 import UIKit
 
 @MainActor
-protocol HomeDisplaying: AnyObject {
-    func showLoading()
-    func showCharacters(_ characters: [CharacterCellViewModel])
-    func appendCharacters(_ characters: [CharacterCellViewModel])
-    func showSearchEmptyState(_ isVisible: Bool)
-    func showPaginationLoading(_ isLoading: Bool)
-    func showPaginationError(_ error: ErrorViewModel)
-    func showError(_ error: ErrorViewModel)
+protocol HomeDisplayLogic: AnyObject {
+    func displayLoading()
+    func displayCharacters(_ characters: [CharacterCellViewModel])
+    func displayAdditionalCharacters(_ characters: [CharacterCellViewModel])
+    func displaySearchEmptyState(_ isVisible: Bool)
+    func displayPaginationLoading(_ isLoading: Bool)
+    func displayPaginationError(_ error: ErrorViewModel)
+    func displayError(_ error: ErrorViewModel)
+    func displaySelectedCharacter(_ character: Character)
 }
 
 final class HomeViewController: UIViewController {
@@ -18,17 +19,20 @@ final class HomeViewController: UIViewController {
         return searchController
     }()
 
-    let presenter: any HomePresenting
+    let interactor: any HomeBusinessLogic
+    weak var router: (any HomeRouting)?
     let homeView: any HomeViewing
     var characters: [CharacterCellViewModel] = []
     var isInitialLoading = false
     var isPaginationLoading = false
 
     init(
-        presenter: any HomePresenting,
+        interactor: any HomeBusinessLogic,
+        router: any HomeRouting,
         homeView: any HomeViewing
     ) {
-        self.presenter = presenter
+        self.interactor = interactor
+        self.router = router
         self.homeView = homeView
         super.init(nibName: nil, bundle: nil)
     }
@@ -51,7 +55,7 @@ final class HomeViewController: UIViewController {
         setupContent()
         setupNavigationBar()
         setupSearchController()
-        presenter.viewDidLoad()
+        interactor.loadInitialCharacters()
     }
 }
 
@@ -67,15 +71,15 @@ private enum Strings {
     static let cancel = "Cancel"
 }
 
-extension HomeViewController: HomeDisplaying {
-    func showLoading() {
+extension HomeViewController: HomeDisplayLogic {
+    func displayLoading() {
         isInitialLoading = true
         isPaginationLoading = false
         homeView.setLoading(true)
         homeView.setSearchEmptyState(false)
     }
 
-    func showCharacters(_ characters: [CharacterCellViewModel]) {
+    func displayCharacters(_ characters: [CharacterCellViewModel]) {
         isInitialLoading = false
         isPaginationLoading = false
         self.characters = characters
@@ -83,7 +87,7 @@ extension HomeViewController: HomeDisplaying {
         homeView.tableView.reloadData()
     }
 
-    func appendCharacters(_ characters: [CharacterCellViewModel]) {
+    func displayAdditionalCharacters(_ characters: [CharacterCellViewModel]) {
         isPaginationLoading = false
         homeView.setPaginationLoading(false)
 
@@ -96,11 +100,11 @@ extension HomeViewController: HomeDisplaying {
         homeView.tableView.reloadData()
     }
 
-    func showSearchEmptyState(_ isVisible: Bool) {
+    func displaySearchEmptyState(_ isVisible: Bool) {
         homeView.setSearchEmptyState(isVisible)
     }
 
-    func showPaginationLoading(_ isLoading: Bool) {
+    func displayPaginationLoading(_ isLoading: Bool) {
         guard isLoading != isPaginationLoading else {
             return
         }
@@ -109,7 +113,7 @@ extension HomeViewController: HomeDisplaying {
         homeView.setPaginationLoading(isLoading)
     }
 
-    func showError(_ error: ErrorViewModel) {
+    func displayError(_ error: ErrorViewModel) {
         isInitialLoading = false
         isPaginationLoading = false
         homeView.setLoading(false)
@@ -127,7 +131,7 @@ extension HomeViewController: HomeDisplaying {
                     title: Strings.retry,
                     style: .default
                 ) { [weak self] _ in
-                    self?.presenter.retryInitialLoading()
+                    self?.interactor.retryInitialLoading()
                 }
             )
         }
@@ -140,7 +144,7 @@ extension HomeViewController: HomeDisplaying {
         present(alert, animated: true)
     }
 
-    func showPaginationError(_ error: ErrorViewModel) {
+    func displayPaginationError(_ error: ErrorViewModel) {
         guard presentedViewController == nil else {
             return
         }
@@ -156,7 +160,7 @@ extension HomeViewController: HomeDisplaying {
                     title: Strings.retry,
                     style: .default
                 ) { [weak self] _ in
-                    self?.presenter.retryNextPage()
+                    self?.interactor.retryNextPage()
                 }
             )
         }
@@ -165,10 +169,14 @@ extension HomeViewController: HomeDisplaying {
                 title: Strings.cancel,
                 style: .cancel
             ) { [weak self] _ in
-                self?.presenter.dismissPaginationError()
+                self?.interactor.dismissPaginationError()
             }
         )
         present(alert, animated: true)
+    }
+
+    func displaySelectedCharacter(_ character: Character) {
+        router?.showDetails(for: character)
     }
 }
 
@@ -207,7 +215,7 @@ extension HomeViewController: UITableViewDelegate {
         }
 
         let characterID = characters[indexPath.row].id
-        presenter.didSelectCharacter(id: characterID)
+        interactor.selectCharacter(id: characterID)
     }
 }
 
@@ -229,7 +237,7 @@ extension HomeViewController: UITableViewDataSourcePrefetching {
             return
         }
 
-        presenter.loadNextPage()
+        interactor.loadNextPage()
     }
 }
 
@@ -245,7 +253,7 @@ extension HomeViewController: UISearchBarDelegate {
 
 extension HomeViewController: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
-        presenter.searchCharacters(
+        interactor.searchCharacters(
             with: searchController.searchBar.text ?? ""
         )
     }
