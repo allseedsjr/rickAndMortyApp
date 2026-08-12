@@ -9,13 +9,15 @@ final class HomePresenterTests {
     private let paginationStateSpy = HomePaginationStateSpy()
     private let viewSpy = HomeDisplaySpy()
     private let searchFilterSpy = CharacterSearchFilterSpy()
+    private let errorMapperSpy = ErrorViewModelMapperSpy()
 
     private lazy var sut: HomePresenter = {
         let presenter = HomePresenter(
             interactor: interactorSpy,
             viewModelMapper: mapperSpy,
             paginationState: paginationStateSpy,
-            searchFilter: searchFilterSpy
+            searchFilter: searchFilterSpy,
+            errorMapper: errorMapperSpy
         )
         presenter.view = viewSpy
         return presenter
@@ -79,8 +81,23 @@ final class HomePresenterTests {
         }
 
         #expect(paginationStateSpy.receivedFailureKinds == [false])
-        #expect(viewSpy.errorMessages.count == 1)
-        #expect(viewSpy.paginationErrorMessages.isEmpty)
+        #expect(errorMapperSpy.receivedErrors.count == 1)
+        #expect(viewSpy.errors == [errorMapperSpy.result])
+        #expect(viewSpy.paginationErrors.isEmpty)
+    }
+
+    @Test
+    func testViewDidLoad_WhenRequestIsCancelled_DoesNotShowError() async {
+        interactorSpy.result = .failure(CancellationError())
+
+        await waitForRequestToFinishWithoutDisplaying {
+            sut.viewDidLoad()
+        }
+        await Task.yield()
+
+        #expect(errorMapperSpy.receivedErrors.isEmpty)
+        #expect(viewSpy.errors.isEmpty)
+        #expect(viewSpy.paginationErrors.isEmpty)
     }
 
     @Test
@@ -93,8 +110,9 @@ final class HomePresenterTests {
 
         #expect(paginationStateSpy.receivedFailureKinds == [true])
         #expect(viewSpy.paginationLoadingStates == [true, false])
-        #expect(viewSpy.paginationErrorMessages.count == 1)
-        #expect(viewSpy.errorMessages.isEmpty)
+        #expect(errorMapperSpy.receivedErrors.count == 1)
+        #expect(viewSpy.paginationErrors == [errorMapperSpy.result])
+        #expect(viewSpy.errors.isEmpty)
     }
 
     @Test

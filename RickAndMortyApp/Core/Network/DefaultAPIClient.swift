@@ -4,41 +4,48 @@ final class DefaultAPIClient: APIClient {
     private let baseURL: String
     private let transport: HTTPTransport
     private let decoder: JSONDecoder
+    private let errorMapper: any AppErrorMapping
 
     init(
         baseURL: String,
         transport: HTTPTransport,
-        decoder: JSONDecoder = JSONDecoder()
+        decoder: JSONDecoder = JSONDecoder(),
+        errorMapper: any AppErrorMapping = AppErrorMapper()
     ) {
         self.baseURL = baseURL
         self.transport = transport
         self.decoder = decoder
+        self.errorMapper = errorMapper
     }
 
     func execute<Request: APIRequest>(
         _ request: Request
     ) async throws -> Request.Response {
-        let urlRequest = try makeURLRequest(
-            from: request
-        )
-
-        let response = try await transport.execute(
-            urlRequest
-        )
-
-        guard 200..<300 ~= response.statusCode else {
-            throw NetworkError.http(
-                statusCode: response.statusCode
-            )
-        }
-
         do {
-            return try decoder.decode(
-                Request.Response.self,
-                from: response.data
+            let urlRequest = try makeURLRequest(
+                from: request
             )
+
+            let response = try await transport.execute(
+                urlRequest
+            )
+
+            guard 200..<300 ~= response.statusCode else {
+                throw NetworkError.http(
+                    statusCode: response.statusCode
+                )
+            }
+
+            do {
+                return try decoder.decode(
+                    Request.Response.self,
+                    from: response.data
+                )
+            } catch {
+                throw NetworkError.decoding
+            }
         } catch {
-            throw NetworkError.decoding
+            throw errorMapper.map(error)
         }
     }
 

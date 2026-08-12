@@ -12,8 +12,8 @@ final class HomeDisplaySpy: HomeDisplaying {
     private(set) var appendedCharacters: [[CharacterCellViewModel]] = []
     private(set) var searchEmptyStateVisibility: [Bool] = []
     private(set) var paginationLoadingStates: [Bool] = []
-    private(set) var paginationErrorMessages: [String] = []
-    private(set) var errorMessages: [String] = []
+    private(set) var paginationErrors: [ErrorViewModel] = []
+    private(set) var errors: [ErrorViewModel] = []
 
     func showLoading() {
         showLoadingCallCount += 1
@@ -41,15 +41,15 @@ final class HomeDisplaySpy: HomeDisplaying {
         paginationLoadingStates.append(isLoading)
     }
 
-    func showPaginationError(message: String) {
-        paginationErrorMessages.append(message)
+    func showPaginationError(_ error: ErrorViewModel) {
+        paginationErrors.append(error)
         let callback = onShowPaginationError
         onShowPaginationError = nil
         callback?()
     }
 
-    func showError(message: String) {
-        errorMessages.append(message)
+    func showError(_ error: ErrorViewModel) {
+        errors.append(error)
         let callback = onShowError
         onShowError = nil
         callback?()

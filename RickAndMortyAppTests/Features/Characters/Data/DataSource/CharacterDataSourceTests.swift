@@ -36,9 +36,9 @@ final class CharacterDataSourceTests {
 
     @Test
     func testGetCharacters_WhenClientFails_PropagatesError() async {
-        apiClientSpy.result = .failure(NetworkError.timeout)
+        apiClientSpy.result = .failure(AppError.timeout)
 
-        await #expect(throws: NetworkError.timeout) {
+        await #expect(throws: AppError.timeout) {
             try await sut.getCharacters(page: 1)
         }
     }

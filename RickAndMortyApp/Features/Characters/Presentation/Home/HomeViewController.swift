@@ -7,8 +7,8 @@ protocol HomeDisplaying: AnyObject {
     func appendCharacters(_ characters: [CharacterCellViewModel])
     func showSearchEmptyState(_ isVisible: Bool)
     func showPaginationLoading(_ isLoading: Bool)
-    func showPaginationError(message: String)
-    func showError(message: String)
+    func showPaginationError(_ error: ErrorViewModel)
+    func showError(_ error: ErrorViewModel)
 }
 
 final class HomeViewController: UIViewController {

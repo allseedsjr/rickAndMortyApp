@@ -107,9 +107,9 @@ final class CharactersRepositoryImplTests {
                 createdAt: dateProviderStub.now.addingTimeInterval(-121)
             )
         )
-        remoteDataSourceSpy.result = .failure(NetworkError.timeout)
+        remoteDataSourceSpy.result = .failure(AppError.timeout)
 
-        await #expect(throws: NetworkError.timeout) {
+        await #expect(throws: AppError.timeout) {
             try await sut.getCharacters(page: 1)
         }
 

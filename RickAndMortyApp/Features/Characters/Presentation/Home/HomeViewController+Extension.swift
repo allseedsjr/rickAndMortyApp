@@ -8,7 +8,6 @@ private enum Strings {
     static let screenTitle = "List of Characters"
     static let searchPlaceholder = "Search characters"
     static let searchAccessibilityLabel = "Search characters"
-    static let errorTitle = "Something went wrong"
     static let retry = "Retry"
     static let cancel = "Cancel"
 }
@@ -55,7 +54,7 @@ extension HomeViewController: HomeDisplaying {
         homeView.setPaginationLoading(isLoading)
     }
 
-    func showError(message: String) {
+    func showError(_ error: ErrorViewModel) {
         isInitialLoading = false
         isPaginationLoading = false
         homeView.setLoading(false)
@@ -63,39 +62,49 @@ extension HomeViewController: HomeDisplaying {
         homeView.tableView.reloadData()
 
         let alert = UIAlertController(
-            title: Strings.errorTitle,
-            message: message,
+            title: error.title,
+            message: error.message,
             preferredStyle: .alert
         )
+        if error.allowsRetry {
+            alert.addAction(
+                UIAlertAction(
+                    title: Strings.retry,
+                    style: .default
+                ) { [weak self] _ in
+                    self?.presenter.retryInitialLoading()
+                }
+            )
+        }
         alert.addAction(
             UIAlertAction(
-                title: Strings.retry,
-                style: .default
-            ) { [weak self] _ in
-                self?.presenter.retryInitialLoading()
-            }
+                title: Strings.cancel,
+                style: .cancel
+            )
         )
         present(alert, animated: true)
     }
 
-    func showPaginationError(message: String) {
+    func showPaginationError(_ error: ErrorViewModel) {
         guard presentedViewController == nil else {
             return
         }
 
         let alert = UIAlertController(
-            title: Strings.errorTitle,
-            message: message,
+            title: error.title,
+            message: error.message,
             preferredStyle: .alert
         )
-        alert.addAction(
-            UIAlertAction(
-                title: Strings.retry,
-                style: .default
-            ) { [weak self] _ in
-                self?.presenter.retryNextPage()
-            }
-        )
+        if error.allowsRetry {
+            alert.addAction(
+                UIAlertAction(
+                    title: Strings.retry,
+                    style: .default
+                ) { [weak self] _ in
+                    self?.presenter.retryNextPage()
+                }
+            )
+        }
         alert.addAction(
             UIAlertAction(
                 title: Strings.cancel,
