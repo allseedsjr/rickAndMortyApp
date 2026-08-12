@@ -11,7 +11,7 @@ struct Character: Equatable {
     let originName: String
     let locationName: String
     let episodeCount: Int
-    let firstEpisodeURL: String?
+    let firstEpisodeID: Int?
 
     init(
         id: Int,
@@ -24,7 +24,7 @@ struct Character: Equatable {
         originName: String,
         locationName: String,
         episodeCount: Int,
-        firstEpisodeURL: String? = nil
+        firstEpisodeID: Int? = nil
     ) {
         self.id = id
         self.name = name
@@ -36,6 +36,6 @@ struct Character: Equatable {
         self.originName = originName
         self.locationName = locationName
         self.episodeCount = episodeCount
-        self.firstEpisodeURL = firstEpisodeURL
+        self.firstEpisodeID = firstEpisodeID
     }
 }

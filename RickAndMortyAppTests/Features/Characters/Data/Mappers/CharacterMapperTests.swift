@@ -15,7 +15,10 @@ struct CharacterMapperTests {
             origin: .fixture(name: "Planet Squanch"),
             location: .fixture(name: "Replacement Dimension"),
             image: "https://example.com/squanchy.jpeg",
-            episode: ["episode-1", "episode-2"]
+            episode: [
+                "https://rickandmortyapi.com/api/episode/1",
+                "https://rickandmortyapi.com/api/episode/2"
+            ]
         )
         let expectedCharacter = Character.fixture(
             id: 7,
@@ -28,7 +31,7 @@ struct CharacterMapperTests {
             originName: "Planet Squanch",
             locationName: "Replacement Dimension",
             episodeCount: 2,
-            firstEpisodeURL: "episode-1"
+            firstEpisodeID: 1
         )
 
         let character = Character(dto: dto)
@@ -43,6 +46,15 @@ struct CharacterMapperTests {
         let character = Character(dto: dto)
 
         #expect(character.episodeCount == 0)
-        #expect(character.firstEpisodeURL == nil)
+        #expect(character.firstEpisodeID == nil)
+    }
+
+    @Test
+    func testInit_WhenFirstEpisodeURLIsInvalid_MapsNilEpisodeID() {
+        let dto = CharacterDTO.fixture(episode: ["invalid-episode"])
+
+        let character = Character(dto: dto)
+
+        #expect(character.firstEpisodeID == nil)
     }
 }

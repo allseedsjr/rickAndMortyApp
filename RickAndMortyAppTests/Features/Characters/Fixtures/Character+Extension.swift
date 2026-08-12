@@ -12,7 +12,7 @@ extension Character {
         originName: String = "Earth (C-137)",
         locationName: String = "Citadel of Ricks",
         episodeCount: Int = 1,
-        firstEpisodeURL: String? = "https://rickandmortyapi.com/api/episode/1"
+        firstEpisodeID: Int? = 1
     ) -> Character {
         Character(
             id: id,
@@ -25,7 +25,7 @@ extension Character {
             originName: originName,
             locationName: locationName,
             episodeCount: episodeCount,
-            firstEpisodeURL: firstEpisodeURL
+            firstEpisodeID: firstEpisodeID
         )
     }
 }

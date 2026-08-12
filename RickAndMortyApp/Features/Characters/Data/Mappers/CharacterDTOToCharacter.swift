@@ -1,3 +1,5 @@
+import Foundation
+
 extension Character {
     init(dto: CharacterDTO) {
         self.init(
@@ -11,7 +13,16 @@ extension Character {
             originName: dto.origin.name,
             locationName: dto.location.name,
             episodeCount: dto.episode.count,
-            firstEpisodeURL: dto.episode.first
+            firstEpisodeID: dto.episode.first.flatMap(Self.episodeID)
         )
+    }
+
+    private static func episodeID(from value: String) -> Int? {
+        guard let url = URL(string: value),
+              let id = Int(url.lastPathComponent) else {
+            return nil
+        }
+
+        return id
     }
 }
