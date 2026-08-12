@@ -1,23 +1,26 @@
 import UIKit
 
 @MainActor
-protocol DetailsDisplaying: AnyObject {
-    func showCharacter(_ viewModel: DetailsViewModel)
-    func showFirstSeenInLoading()
-    func showFirstSeenIn(_ viewModel: FirstSeenInViewModel)
-    func showFirstSeenInUnavailable()
-    func showFirstSeenInError(_ error: ErrorViewModel)
+protocol DetailsDisplayLogic: AnyObject {
+    func displayCharacter(_ viewModel: DetailsViewModel)
+    func displayFirstSeenInLoading()
+    func displayFirstSeenIn(_ viewModel: FirstSeenInViewModel)
+    func displayFirstSeenInUnavailable()
+    func displayFirstSeenInError(_ error: ErrorViewModel)
 }
 
 final class DetailsViewController: UIViewController {
-    let presenter: any DetailsPresenting
+    let interactor: any DetailsBusinessLogic
+    weak var router: (any DetailsRouting)?
     let detailsView: any DetailsViewing
 
     init(
-        presenter: any DetailsPresenting,
+        interactor: any DetailsBusinessLogic,
+        router: any DetailsRouting,
         detailsView: any DetailsViewing
     ) {
-        self.presenter = presenter
+        self.interactor = interactor
+        self.router = router
         self.detailsView = detailsView
         super.init(nibName: nil, bundle: nil)
     }
@@ -37,7 +40,7 @@ final class DetailsViewController: UIViewController {
             action: #selector(didTapBack),
             for: .touchUpInside
         )
-        presenter.viewDidLoad()
+        interactor.loadDetails()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -51,7 +54,7 @@ final class DetailsViewController: UIViewController {
     }
 
     @objc private func didTapBack() {
-        presenter.didTapBack()
+        router?.showHome()
     }
 }
 
@@ -60,24 +63,24 @@ private enum Strings {
     static let cancel = "Cancel"
 }
 
-extension DetailsViewController: DetailsDisplaying {
-    func showCharacter(_ viewModel: DetailsViewModel) {
+extension DetailsViewController: DetailsDisplayLogic {
+    func displayCharacter(_ viewModel: DetailsViewModel) {
         detailsView.configure(with: viewModel)
     }
 
-    func showFirstSeenInLoading() {
+    func displayFirstSeenInLoading() {
         detailsView.setFirstSeenInLoading()
     }
 
-    func showFirstSeenIn(_ viewModel: FirstSeenInViewModel) {
+    func displayFirstSeenIn(_ viewModel: FirstSeenInViewModel) {
         detailsView.setFirstSeenIn(viewModel)
     }
 
-    func showFirstSeenInUnavailable() {
+    func displayFirstSeenInUnavailable() {
         detailsView.setFirstSeenInUnavailable()
     }
 
-    func showFirstSeenInError(_ error: ErrorViewModel) {
+    func displayFirstSeenInError(_ error: ErrorViewModel) {
         detailsView.setFirstSeenInUnavailable()
 
         let alert = UIAlertController(
@@ -88,7 +91,7 @@ extension DetailsViewController: DetailsDisplaying {
         if error.allowsRetry {
             alert.addAction(
                 UIAlertAction(title: Strings.retry, style: .default) { [weak self] _ in
-                    self?.presenter.retryFirstSeenIn()
+                    self?.interactor.retryFirstSeenIn()
                 }
             )
         }

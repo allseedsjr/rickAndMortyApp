@@ -1,34 +1,30 @@
 @testable import RickAndMortyApp
 
 @MainActor
-final class DetailsDisplaySpy: DetailsDisplaying {
-    private(set) var shownCharacters: [DetailsViewModel] = []
+final class DetailsDisplaySpy: DetailsDisplayLogic {
+    private(set) var displayedCharacters: [DetailsViewModel] = []
     private(set) var loadingCallCount = 0
-    private(set) var shownFirstSeenIn: [FirstSeenInViewModel] = []
+    private(set) var displayedFirstSeenIn: [FirstSeenInViewModel] = []
     private(set) var unavailableCallCount = 0
-    private(set) var shownErrors: [ErrorViewModel] = []
-    var onShowFirstSeenIn: (() -> Void)?
-    var onShowError: (() -> Void)?
+    private(set) var displayedErrors: [ErrorViewModel] = []
 
-    func showCharacter(_ viewModel: DetailsViewModel) {
-        shownCharacters.append(viewModel)
+    func displayCharacter(_ viewModel: DetailsViewModel) {
+        displayedCharacters.append(viewModel)
     }
 
-    func showFirstSeenInLoading() {
+    func displayFirstSeenInLoading() {
         loadingCallCount += 1
     }
 
-    func showFirstSeenIn(_ viewModel: FirstSeenInViewModel) {
-        shownFirstSeenIn.append(viewModel)
-        onShowFirstSeenIn?()
+    func displayFirstSeenIn(_ viewModel: FirstSeenInViewModel) {
+        displayedFirstSeenIn.append(viewModel)
     }
 
-    func showFirstSeenInUnavailable() {
+    func displayFirstSeenInUnavailable() {
         unavailableCallCount += 1
     }
 
-    func showFirstSeenInError(_ error: ErrorViewModel) {
-        shownErrors.append(error)
-        onShowError?()
+    func displayFirstSeenInError(_ error: ErrorViewModel) {
+        displayedErrors.append(error)
     }
 }

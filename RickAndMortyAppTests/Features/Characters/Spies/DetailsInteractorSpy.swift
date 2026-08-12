@@ -1,11 +1,15 @@
 @testable import RickAndMortyApp
 
-final class DetailsInteractorSpy: DetailsInteracting {
-    private(set) var receivedEpisodeIDs: [Int] = []
-    var result: Result<FirstSeenIn, Error> = .success(.fixture())
+@MainActor
+final class DetailsInteractorSpy: DetailsBusinessLogic {
+    private(set) var loadDetailsCallCount = 0
+    private(set) var retryFirstSeenInCallCount = 0
 
-    func getFirstSeenIn(episodeID: Int) async throws -> FirstSeenIn {
-        receivedEpisodeIDs.append(episodeID)
-        return try result.get()
+    func loadDetails() {
+        loadDetailsCallCount += 1
+    }
+
+    func retryFirstSeenIn() {
+        retryFirstSeenInCallCount += 1
     }
 }

@@ -32,16 +32,18 @@ enum DetailsModuleFactory {
             cacheLoader: episodeCacheLoader
         )
         let useCase = GetFirstSeenInUseCase(repository: repository)
-        let interactor = DetailsInteractor(getFirstSeenInUseCase: useCase)
         let presenter = DetailsPresenter(
-            character: character,
-            interactor: interactor,
             mapper: DetailsViewModelMapper(),
-            errorMapper: ErrorViewModelMapper(),
-            router: router
+            errorMapper: ErrorViewModelMapper()
+        )
+        let interactor = DetailsInteractor(
+            character: character,
+            getFirstSeenInUseCase: useCase,
+            presenter: presenter
         )
         let viewController = DetailsViewController(
-            presenter: presenter,
+            interactor: interactor,
+            router: router,
             detailsView: DetailsView()
         )
         presenter.view = viewController

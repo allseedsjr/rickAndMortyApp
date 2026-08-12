@@ -1,80 +1,44 @@
 @MainActor
-protocol DetailsPresenting {
-    func viewDidLoad()
-    func retryFirstSeenIn()
-    func didTapBack()
+protocol DetailsPresentationLogic {
+    func presentCharacter(_ character: Character)
+    func presentFirstSeenInLoading()
+    func presentFirstSeenIn(_ firstSeenIn: FirstSeenIn)
+    func presentFirstSeenInUnavailable()
+    func presentFirstSeenInError(_ error: any Error)
 }
 
 @MainActor
-final class DetailsPresenter: DetailsPresenting {
-    weak var view: (any DetailsDisplaying)?
+final class DetailsPresenter: DetailsPresentationLogic {
+    weak var view: (any DetailsDisplayLogic)?
 
-    private let character: Character
-    private let interactor: any DetailsInteracting
     private let mapper: any DetailsViewModelMapping
     private let errorMapper: any ErrorViewModelMapping
-    private weak var router: (any DetailsRouting)?
-    private var firstSeenInTask: Task<Void, Never>?
 
     init(
-        character: Character,
-        interactor: any DetailsInteracting,
         mapper: any DetailsViewModelMapping,
-        errorMapper: any ErrorViewModelMapping,
-        router: any DetailsRouting
+        errorMapper: any ErrorViewModelMapping
     ) {
-        self.character = character
-        self.interactor = interactor
         self.mapper = mapper
         self.errorMapper = errorMapper
-        self.router = router
     }
 
-    deinit {
-        firstSeenInTask?.cancel()
+    func presentCharacter(_ character: Character) {
+        view?.displayCharacter(mapper.map(character))
     }
 
-    func viewDidLoad() {
-        view?.showCharacter(mapper.map(character))
-        loadFirstSeenIn()
+    func presentFirstSeenInLoading() {
+        view?.displayFirstSeenInLoading()
     }
 
-    func retryFirstSeenIn() {
-        loadFirstSeenIn()
+    func presentFirstSeenIn(_ firstSeenIn: FirstSeenIn) {
+        view?.displayFirstSeenIn(mapper.map(firstSeenIn))
     }
 
-    func didTapBack() {
-        router?.showHome()
+    func presentFirstSeenInUnavailable() {
+        view?.displayFirstSeenInUnavailable()
     }
 
-    private func loadFirstSeenIn() {
-        firstSeenInTask?.cancel()
-
-        guard let episodeID = character.firstEpisodeID else {
-            view?.showFirstSeenInUnavailable()
-            return
-        }
-
-        view?.showFirstSeenInLoading()
-        let interactor = interactor
-
-        firstSeenInTask = Task { [weak self] in
-            do {
-                try Task.checkCancellation()
-                let firstSeenIn = try await interactor.getFirstSeenIn(
-                    episodeID: episodeID
-                )
-                try Task.checkCancellation()
-                guard let self else { return }
-                self.firstSeenInTask = nil
-                self.view?.showFirstSeenIn(self.mapper.map(firstSeenIn))
-            } catch is CancellationError {
-                return
-            } catch {
-                guard !Task.isCancelled, let self else { return }
-                self.firstSeenInTask = nil
-                self.view?.showFirstSeenInError(self.errorMapper.map(error))
-            }
-        }
+    func presentFirstSeenInError(_ error: any Error) {
+        view?.displayFirstSeenInError(errorMapper.map(error))
     }
 }
