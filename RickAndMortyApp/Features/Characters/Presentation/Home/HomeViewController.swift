@@ -7,8 +7,20 @@ final class HomeViewController: UIViewController {
         return searchController
     }()
 
-    let homeView = HomeView()
+    let presenter: any HomePresenting
+    let homeView: HomeView
     var characters: [CharacterCellViewModel] = []
+
+    init(presenter: any HomePresenting, homeView: HomeView) {
+        self.presenter = presenter
+        self.homeView = homeView
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        return nil
+    }
 
     override func loadView() {
         view = homeView
@@ -21,5 +33,6 @@ final class HomeViewController: UIViewController {
         setupContent()
         setupNavigationBar()
         setupSearchController()
+        presenter.viewDidLoad()
     }
 }
