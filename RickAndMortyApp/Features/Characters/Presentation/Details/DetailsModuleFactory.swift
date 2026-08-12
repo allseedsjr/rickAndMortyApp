@@ -3,7 +3,10 @@ import UIKit
 
 @MainActor
 enum DetailsModuleFactory {
-    static func make(character: Character) -> DetailsViewController {
+    static func make(
+        character: Character,
+        router: any DetailsRouting
+    ) -> DetailsViewController {
         let transport = AlamofireHTTPTransport(session: Session.default)
         let apiClient = DefaultAPIClient(
             baseURL: APIEndpoint.baseURL,
@@ -17,7 +20,8 @@ enum DetailsModuleFactory {
             character: character,
             interactor: interactor,
             mapper: DetailsViewModelMapper(),
-            errorMapper: ErrorViewModelMapper()
+            errorMapper: ErrorViewModelMapper(),
+            router: router
         )
         let viewController = DetailsViewController(
             presenter: presenter,

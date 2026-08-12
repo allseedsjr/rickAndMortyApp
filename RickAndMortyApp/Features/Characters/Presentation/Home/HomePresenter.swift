@@ -28,7 +28,7 @@ final class HomePresenter: HomePresenting {
     private let viewModelMapper: any CharacterCellViewModelMapping
     private let searchFilter: any CharacterSearchFiltering
     private let errorMapper: any ErrorViewModelMapping
-    private let router: any HomeRouting
+    private weak var router: (any HomeRouting)?
     private var paginationState: any HomePaginationStateHandling
     private var requestGeneration = 0
     private var charactersTask: Task<Void, Never>?
@@ -110,7 +110,7 @@ final class HomePresenter: HomePresenting {
             return
         }
 
-        router.showDetails(for: character)
+        router?.showDetails(for: character)
     }
 
     private func loadCharacters(
