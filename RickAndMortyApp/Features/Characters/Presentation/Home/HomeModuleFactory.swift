@@ -9,7 +9,7 @@ enum HomeModuleFactory {
         static let cacheFile = "characters-page-one.json"
     }
 
-    static func make() -> HomeViewController {
+    static func make(router: any HomeRouting) -> HomeViewController {
         ImageCacheConfigurator.configure(
             ttl: CharacterCachePolicy.default.ttl
         )
@@ -41,7 +41,6 @@ enum HomeModuleFactory {
         let interactor = HomeInteractor(
             getCharactersUseCase: useCase
         )
-        let router = HomeRouter()
         let presenter = HomePresenter(
             interactor: interactor,
             viewModelMapper: CharacterCellViewModelMapper(),
@@ -56,7 +55,6 @@ enum HomeModuleFactory {
         )
 
         presenter.view = viewController
-        router.viewController = viewController
         return viewController
     }
 

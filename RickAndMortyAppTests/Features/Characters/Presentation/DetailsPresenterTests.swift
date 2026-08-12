@@ -8,13 +8,15 @@ final class DetailsPresenterTests {
     private let mapperSpy = DetailsViewModelMapperSpy()
     private let errorMapperSpy = ErrorViewModelMapperSpy()
     private let viewSpy = DetailsDisplaySpy()
+    private let routerSpy = DetailsRouterSpy()
 
     private lazy var sut: DetailsPresenter = {
         let presenter = DetailsPresenter(
             character: .fixture(firstEpisodeID: 7),
             interactor: interactorSpy,
             mapper: mapperSpy,
-            errorMapper: errorMapperSpy
+            errorMapper: errorMapperSpy,
+            router: routerSpy
         )
         presenter.view = viewSpy
         return presenter
@@ -39,7 +41,8 @@ final class DetailsPresenterTests {
             character: .fixture(firstEpisodeID: nil),
             interactor: interactorSpy,
             mapper: mapperSpy,
-            errorMapper: errorMapperSpy
+            errorMapper: errorMapperSpy,
+            router: routerSpy
         )
         presenter.view = viewSpy
 
@@ -71,6 +74,13 @@ final class DetailsPresenterTests {
         }
 
         #expect(interactorSpy.receivedEpisodeIDs == [7, 7])
+    }
+
+    @Test
+    func testDidTapBack_RoutesToHome() {
+        sut.didTapBack()
+
+        #expect(routerSpy.showHomeCallCount == 1)
     }
 
     private func waitForFirstSeenIn(perform: () -> Void) async {

@@ -2,6 +2,7 @@
 protocol DetailsPresenting {
     func viewDidLoad()
     func retryFirstSeenIn()
+    func didTapBack()
 }
 
 @MainActor
@@ -12,18 +13,21 @@ final class DetailsPresenter: DetailsPresenting {
     private let interactor: any DetailsInteracting
     private let mapper: any DetailsViewModelMapping
     private let errorMapper: any ErrorViewModelMapping
+    private weak var router: (any DetailsRouting)?
     private var firstSeenInTask: Task<Void, Never>?
 
     init(
         character: Character,
         interactor: any DetailsInteracting,
         mapper: any DetailsViewModelMapping,
-        errorMapper: any ErrorViewModelMapping
+        errorMapper: any ErrorViewModelMapping,
+        router: any DetailsRouting
     ) {
         self.character = character
         self.interactor = interactor
         self.mapper = mapper
         self.errorMapper = errorMapper
+        self.router = router
     }
 
     deinit {
@@ -37,6 +41,10 @@ final class DetailsPresenter: DetailsPresenting {
 
     func retryFirstSeenIn() {
         loadFirstSeenIn()
+    }
+
+    func didTapBack() {
+        router?.showHome()
     }
 
     private func loadFirstSeenIn() {

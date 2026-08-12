@@ -51,7 +51,7 @@ final class DetailsViewController: UIViewController {
     }
 
     @objc private func didTapBack() {
-        navigationController?.popViewController(animated: true)
+        presenter.didTapBack()
     }
 }
 
