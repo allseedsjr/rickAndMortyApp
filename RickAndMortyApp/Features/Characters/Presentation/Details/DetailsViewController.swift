@@ -31,6 +31,7 @@ final class DetailsViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        navigationItem.hidesBackButton = true
         detailsView.backButton.addTarget(
             self,
             action: #selector(didTapBack),

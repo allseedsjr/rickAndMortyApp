@@ -206,7 +206,8 @@ extension HomeViewController: UITableViewDelegate {
             return
         }
 
-        presenter.didSelectCharacter(id: characters[indexPath.row].id)
+        let characterID = characters[indexPath.row].id
+        presenter.didSelectCharacter(id: characterID)
     }
 }
 
