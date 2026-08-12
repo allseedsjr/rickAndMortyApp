@@ -4,6 +4,36 @@ private enum Strings {
     static let screenTitle = "List of Characters"
     static let searchPlaceholder = "Search characters"
     static let searchAccessibilityLabel = "Search characters"
+    static let errorTitle = "Something went wrong"
+    static let retry = "Retry"
+}
+
+extension HomeViewController: HomeDisplaying {
+    func showLoading() {
+        homeView.setLoading(true)
+    }
+
+    func showCharacters(_ characters: [CharacterCellViewModel]) {
+        self.characters = characters
+        homeView.setLoading(false)
+        homeView.tableView.reloadData()
+    }
+
+    func showError(message: String) {
+        homeView.setLoading(false)
+
+        let alert = UIAlertController(
+            title: Strings.errorTitle,
+            message: message,
+            preferredStyle: .alert
+        )
+        alert.addAction(
+            UIAlertAction(title: Strings.retry, style: .default) { [weak self] _ in
+                self?.presenter.retryInitialLoading()
+            }
+        )
+        present(alert, animated: true)
+    }
 }
 
 extension HomeViewController: UITableViewDataSource {
