@@ -23,6 +23,13 @@ The first character page and episode responses use a cache-first strategy with a
 - [Project board](https://app.notion.com/p/3b9dfcc8ab5780ec82d4e231e66375fa?v=3b9dfcc8ab578064aa0d000c395a9ce9)
 - [Architecture diagrams](https://excalidraw.com/#json=5cj_YstIGP3XWVW15iPnn,5Makz9QRb8MLmebbDmAwiw)
 
+## App Preview
+| Home | Details |
+|----------|----------|
+| <img width="200" src="https://github.com/user-attachments/assets/dd7f182d-8612-4fa9-bbb8-5be2e200aa25" /> | <img width="200" src="https://github.com/user-attachments/assets/d9988dc4-4f43-46b7-8245-be1dc2a5205a" /> |
+| <img width="200" src="https://github.com/user-attachments/assets/2430f980-7075-4a18-afaa-94e213c11c1e" /> | x  |
+| <img width="200" src="https://github.com/user-attachments/assets/5e606fd6-8b3c-411f-80a0-a5bb4df68f08" />| x  |
+
 ## Requirements
 
 <img width="932" height="727" alt="Screenshot 2026-08-12 at 02 50 19" src="https://github.com/user-attachments/assets/4c702ac8-2751-40da-8404-fc4b72f3d7a4" />
@@ -42,6 +49,7 @@ The first character page and episode responses use a cache-first strategy with a
 - Loading and error states
 - Retry support for recoverable errors
 - Navigation managed by an App Coordinator
+- Typed character status, gender, and species values in the Domain layer
 
 ## Architecture
 
@@ -52,6 +60,9 @@ The project is organized into three main layers:
 - **Data:** DTOs, Data Sources, repository implementations, requests, mappers, and cache
 
 Shared components are located under `Core`, including networking, persistence, image loading, error handling, and View Code utilities.
+
+Remote character attributes are converted into typed Domain values at the Data boundary. Presentation mappers then convert those values into display text and colors shared by Home and Details, keeping API-specific strings and business interpretation outside the UI.
+
 <img width="277" height="441" alt="Screenshot 2026-08-12 at 01 58 33" src="https://github.com/user-attachments/assets/c31b6ba4-efef-4e8e-bbd8-083e5ee1140a" />
 
 
