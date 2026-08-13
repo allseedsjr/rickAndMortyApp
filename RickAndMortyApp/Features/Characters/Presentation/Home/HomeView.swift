@@ -65,7 +65,7 @@ final class HomeView: UIView, HomeViewing, ViewCode {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = Strings.Home.searchEmptyState
-        label.textColor = .secondaryLabel
+        label.textColor = .white
         label.font = .preferredFont(forTextStyle: .body)
         label.textAlignment = .center
         label.numberOfLines = 0
