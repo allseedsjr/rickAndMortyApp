@@ -4,10 +4,10 @@ extension Character {
     static func fixture(
         id: Int = 1,
         name: String = "Rick Sanchez",
-        status: String = "Alive",
-        species: String = "Human",
+        status: CharacterStatus = .alive,
+        species: CharacterSpecies = .human,
         type: String = "",
-        gender: String = "Male",
+        gender: CharacterGender = .male,
         imageURL: String = "https://example.com/rick.jpeg",
         originName: String = "Earth (C-137)",
         locationName: String = "Citadel of Ricks",

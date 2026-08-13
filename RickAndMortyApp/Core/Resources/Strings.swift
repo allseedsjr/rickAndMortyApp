@@ -22,6 +22,33 @@ enum Strings {
         static let backAccessibilityLabel = "Back"
     }
 
+    enum CharacterStatus {
+        static let alive = "Alive"
+        static let dead = "Dead"
+        static let unknown = "Unknown"
+    }
+
+    enum CharacterGender {
+        static let female = "Female"
+        static let male = "Male"
+        static let genderless = "Genderless"
+        static let unknown = "Unknown"
+    }
+
+    enum CharacterSpecies {
+        static let human = "Human"
+        static let alien = "Alien"
+        static let humanoid = "Humanoid"
+        static let animal = "Animal"
+        static let robot = "Robot"
+        static let mythologicalCreature = "Mythological Creature"
+        static let poopybutthole = "Poopybutthole"
+        static let cronenberg = "Cronenberg"
+        static let disease = "Disease"
+        static let planet = "Planet"
+        static let unknown = "Unknown"
+    }
+
     enum Error {
         static let offlineTitle = "No internet connection"
         static let offlineMessage = "Check your connection and try again."

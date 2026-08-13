@@ -3,10 +3,10 @@ import Foundation
 struct Character: Equatable {
     let id: Int
     let name: String
-    let status: String
-    let species: String
+    let status: CharacterStatus
+    let species: CharacterSpecies
     let type: String
-    let gender: String
+    let gender: CharacterGender
     let imageURL: String
     let originName: String
     let locationName: String
@@ -16,10 +16,10 @@ struct Character: Equatable {
     init(
         id: Int,
         name: String,
-        status: String,
-        species: String,
+        status: CharacterStatus,
+        species: CharacterSpecies,
         type: String,
-        gender: String,
+        gender: CharacterGender,
         imageURL: String,
         originName: String,
         locationName: String,

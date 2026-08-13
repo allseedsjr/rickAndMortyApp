@@ -1,4 +1,5 @@
 import Testing
+import UIKit
 @testable import RickAndMortyApp
 
 @Suite("DetailsViewModelMapper")
@@ -9,9 +10,9 @@ struct DetailsViewModelMapperTests {
     func testMapCharacter_MapsDetailsContent() {
         let character = Character.fixture(
             name: "Morty Smith",
-            status: "Alive",
-            species: "Human",
-            gender: "Male",
+            status: .alive,
+            species: .human,
+            gender: .male,
             originName: "unknown",
             locationName: "Citadel of Ricks",
             episodeCount: 51
@@ -41,5 +42,21 @@ struct DetailsViewModelMapperTests {
 
         #expect(result.episode == "Pilot (S01E01)")
         #expect(result.airDate == "December 2, 2013")
+    }
+
+    @Test
+    func testMapCharacter_MapsTypedAttributesToPresentationText() {
+        let character = Character.fixture(
+            status: .unknown,
+            species: .other("Vampire"),
+            gender: .genderless
+        )
+
+        let result = sut.map(character)
+
+        #expect(result.status == "Unknown")
+        #expect(result.statusColor == .systemGray)
+        #expect(result.species == "Vampire")
+        #expect(result.gender == "Genderless")
     }
 }
