@@ -58,11 +58,6 @@ final class DetailsViewController: UIViewController {
     }
 }
 
-private enum Strings {
-    static let retry = "Retry"
-    static let cancel = "Cancel"
-}
-
 extension DetailsViewController: DetailsDisplayLogic {
     func displayCharacter(_ viewModel: DetailsViewModel) {
         detailsView.configure(with: viewModel)
@@ -90,13 +85,13 @@ extension DetailsViewController: DetailsDisplayLogic {
         )
         if error.allowsRetry {
             alert.addAction(
-                UIAlertAction(title: Strings.retry, style: .default) { [weak self] _ in
+                UIAlertAction(title: Strings.Common.retry, style: .default) { [weak self] _ in
                     self?.interactor.retryFirstSeenIn()
                 }
             )
         }
         alert.addAction(
-            UIAlertAction(title: Strings.cancel, style: .cancel)
+            UIAlertAction(title: Strings.Common.cancel, style: .cancel)
         )
         present(alert, animated: true)
     }
