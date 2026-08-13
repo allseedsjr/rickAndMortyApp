@@ -23,10 +23,10 @@ struct CharacterMapperTests {
         let expectedCharacter = Character.fixture(
             id: 7,
             name: "Squanchy",
-            status: "Alive",
-            species: "Alien",
+            status: .alive,
+            species: .alien,
             type: "Cat-Person",
-            gender: "Male",
+            gender: .male,
             imageURL: "https://example.com/squanchy.jpeg",
             originName: "Planet Squanch",
             locationName: "Replacement Dimension",
@@ -56,5 +56,58 @@ struct CharacterMapperTests {
         let character = Character(dto: dto)
 
         #expect(character.firstEpisodeID == nil)
+    }
+
+    @Test
+    func testInit_NormalizesStatusAndGenderFromRemoteValues() {
+        let dto = CharacterDTO.fixture(
+            status: "  DeAd  ",
+            gender: " FEMALE "
+        )
+
+        let character = Character(dto: dto)
+
+        #expect(character.status == .dead)
+        #expect(character.gender == .female)
+    }
+
+    @Test
+    func testInit_WhenStatusAndGenderAreUnsupported_MapsUnknownValues() {
+        let dto = CharacterDTO.fixture(
+            status: "inactive",
+            gender: "non-binary"
+        )
+
+        let character = Character(dto: dto)
+
+        #expect(character.status == .unknown)
+        #expect(character.gender == .unknown)
+    }
+
+    @Test
+    func testInit_WhenSpeciesIsKnown_MapsTypedSpecies() {
+        let dto = CharacterDTO.fixture(species: " Mythological Creature ")
+
+        let character = Character(dto: dto)
+
+        #expect(character.species == .mythologicalCreature)
+    }
+
+    @Test
+    func testInit_WhenSpeciesIsUnsupported_PreservesRemoteValue() {
+        let dto = CharacterDTO.fixture(species: "  Vampire  ")
+
+        let character = Character(dto: dto)
+
+        #expect(character.species == .other("Vampire"))
+    }
+
+    @Test
+    func testInit_WhenSpeciesIsEmpty_MapsUnknown() {
+        let dto = CharacterDTO.fixture(species: "   ")
+
+        let character = Character(dto: dto)
+
+        #expect(character.species == .unknown)
     }
 }

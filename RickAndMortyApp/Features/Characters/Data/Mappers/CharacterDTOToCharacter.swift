@@ -5,10 +5,10 @@ extension Character {
         self.init(
             id: dto.id,
             name: dto.name,
-            status: dto.status,
-            species: dto.species,
+            status: CharacterAttributeMapper.status(from: dto.status),
+            species: CharacterAttributeMapper.species(from: dto.species),
             type: dto.type,
-            gender: dto.gender,
+            gender: CharacterAttributeMapper.gender(from: dto.gender),
             imageURL: dto.image,
             originName: dto.origin.name,
             locationName: dto.location.name,

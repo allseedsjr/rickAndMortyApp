@@ -6,18 +6,21 @@ protocol DetailsViewModelMapping {
 }
 
 struct DetailsViewModelMapper: DetailsViewModelMapping {
-    private enum Status {
-        static let alive = "alive"
-        static let dead = "dead"
+    private let attributeMapper: any CharacterAttributeViewModelMapping
+
+    init(
+        attributeMapper: any CharacterAttributeViewModelMapping = CharacterAttributeViewModelMapper()
+    ) {
+        self.attributeMapper = attributeMapper
     }
 
     func map(_ character: Character) -> DetailsViewModel {
         DetailsViewModel(
             name: character.name,
-            status: character.status,
-            statusColor: statusColor(for: character.status),
-            species: character.species,
-            gender: character.gender,
+            status: attributeMapper.statusText(for: character.status),
+            statusColor: attributeMapper.statusColor(for: character.status),
+            species: attributeMapper.speciesText(for: character.species),
+            gender: attributeMapper.genderText(for: character.gender),
             origin: character.originName,
             location: character.locationName,
             episodeCount: String(character.episodeCount),
@@ -30,17 +33,6 @@ struct DetailsViewModelMapper: DetailsViewModelMapping {
             episode: "\(firstSeenIn.episodeName) (\(firstSeenIn.episodeCode))",
             airDate: firstSeenIn.airDate
         )
-    }
-
-    private func statusColor(for status: String) -> UIColor {
-        switch status.lowercased() {
-        case Status.alive:
-            return .systemGreen
-        case Status.dead:
-            return .systemRed
-        default:
-            return .systemGray
-        }
     }
 
     private func validURL(from value: String) -> URL? {

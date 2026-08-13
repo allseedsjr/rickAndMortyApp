@@ -11,8 +11,8 @@ struct CharacterCellViewModelMapperTests {
         let character = Character.fixture(
             id: 42,
             name: "Morty Smith",
-            status: "Alive",
-            species: "Human",
+            status: .alive,
+            species: .human,
             imageURL: "https://example.com/morty.jpeg"
         )
 
@@ -27,7 +27,7 @@ struct CharacterCellViewModelMapperTests {
 
     @Test
     func testMap_WhenStatusIsAlive_MapsGreenColor() {
-        let character = Character.fixture(status: "Alive")
+        let character = Character.fixture(status: .alive)
 
         let viewModel = sut.map(character)
 
@@ -35,8 +35,8 @@ struct CharacterCellViewModelMapperTests {
     }
 
     @Test
-    func testMap_WhenStatusIsDeadIgnoringCase_MapsRedColor() {
-        let character = Character.fixture(status: "DEAD")
+    func testMap_WhenStatusIsDead_MapsRedColor() {
+        let character = Character.fixture(status: .dead)
 
         let viewModel = sut.map(character)
 
@@ -45,7 +45,7 @@ struct CharacterCellViewModelMapperTests {
 
     @Test
     func testMap_WhenStatusIsUnknown_MapsGrayColor() {
-        let character = Character.fixture(status: "unknown")
+        let character = Character.fixture(status: .unknown)
 
         let viewModel = sut.map(character)
 
@@ -59,5 +59,14 @@ struct CharacterCellViewModelMapperTests {
         let viewModel = sut.map(character)
 
         #expect(viewModel.imageURL == nil)
+    }
+
+    @Test
+    func testMap_WhenSpeciesIsOther_PreservesSpeciesText() {
+        let character = Character.fixture(species: .other("Vampire"))
+
+        let viewModel = sut.map(character)
+
+        #expect(viewModel.species == "Vampire")
     }
 }
