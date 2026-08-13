@@ -5,7 +5,7 @@ protocol CharacterCellViewModelMapping {
 }
 
 struct CharacterCellViewModelMapper: CharacterCellViewModelMapping {
-    private enum Strings {
+    private enum Status {
         static let aliveStatus = "alive"
         static let deadStatus = "dead"
     }
@@ -23,9 +23,9 @@ struct CharacterCellViewModelMapper: CharacterCellViewModelMapping {
 
     private func statusColor(for status: String) -> UIColor {
         switch status.lowercased() {
-        case Strings.aliveStatus:
+        case Status.aliveStatus:
             return .systemGreen
-        case Strings.deadStatus:
+        case Status.deadStatus:
             return .systemRed
         default:
             return .systemGray

@@ -3,7 +3,7 @@ import UIKit
 
 @MainActor
 enum DetailsModuleFactory {
-    private enum Strings {
+    private enum CacheConfiguration {
         static let cacheDirectory = "RickAndMortyApp"
         static let cacheFile = "episodes.json"
     }
@@ -57,7 +57,7 @@ enum DetailsModuleFactory {
         ).first ?? FileManager.default.temporaryDirectory
 
         return cacheURL
-            .appendingPathComponent(Strings.cacheDirectory)
-            .appendingPathComponent(Strings.cacheFile)
+            .appendingPathComponent(CacheConfiguration.cacheDirectory)
+            .appendingPathComponent(CacheConfiguration.cacheFile)
     }
 }

@@ -33,17 +33,6 @@ final class DetailsView: UIView, DetailsViewing, ViewCode {
         static let dividerHeight: CGFloat = 1
     }
 
-    private enum Strings {
-        static let species = "Species"
-        static let gender = "Gender"
-        static let origin = "Origin"
-        static let location = "Location"
-        static let episodes = "Episodes"
-        static let firstSeenIn = "First seen in"
-        static let unavailable = "Unavailable"
-        static let backAccessibilityLabel = "Back"
-    }
-
     var rootView: UIView { self }
 
     let backButton: UIButton = {
@@ -54,7 +43,7 @@ final class DetailsView: UIView, DetailsViewing, ViewCode {
         button.backgroundColor = UIColor.white.withAlphaComponent(0.08)
         button.layer.borderColor = UIColor.white.withAlphaComponent(0.12).cgColor
         button.layer.borderWidth = 1
-        button.accessibilityLabel = Strings.backAccessibilityLabel
+        button.accessibilityLabel = Strings.Details.backAccessibilityLabel
         return button
     }()
 
@@ -140,11 +129,11 @@ final class DetailsView: UIView, DetailsViewing, ViewCode {
     )
     private lazy var informationStack = makeVerticalStack(
         [
-            makeInformationRow(title: Strings.species, value: speciesValue),
-            makeInformationRow(title: Strings.gender, value: genderValue),
-            makeInformationRow(title: Strings.origin, value: originValue),
-            makeInformationRow(title: Strings.location, value: locationValue),
-            makeInformationRow(title: Strings.episodes, value: episodesValue),
+            makeInformationRow(title: Strings.Details.species, value: speciesValue),
+            makeInformationRow(title: Strings.Details.gender, value: genderValue),
+            makeInformationRow(title: Strings.Details.origin, value: originValue),
+            makeInformationRow(title: Strings.Details.location, value: locationValue),
+            makeInformationRow(title: Strings.Details.episodes, value: episodesValue),
             makeDivider(),
             firstSeenTitle,
             firstSeenContentStack
@@ -197,7 +186,7 @@ final class DetailsView: UIView, DetailsViewing, ViewCode {
 
     func setFirstSeenInUnavailable() {
         firstSeenLoadingIndicator.stopAnimating()
-        episodeLabel.text = Strings.unavailable
+        episodeLabel.text = Strings.Common.unavailable
         airDateLabel.text = nil
     }
 
@@ -261,7 +250,7 @@ final class DetailsView: UIView, DetailsViewing, ViewCode {
 
     func setupExtraConfiguration() {
         backgroundColor = Constants.backgroundColor
-        firstSeenTitle.text = Strings.firstSeenIn
+        firstSeenTitle.text = Strings.Details.firstSeenIn
         accessibilityIdentifier = "detailsView"
     }
 

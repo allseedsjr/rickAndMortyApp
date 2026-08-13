@@ -63,14 +63,6 @@ private enum Constants {
     static let paginationThreshold = 8
 }
 
-private enum Strings {
-    static let screenTitle = "List of Characters"
-    static let searchPlaceholder = "Search characters"
-    static let searchAccessibilityLabel = "Search characters"
-    static let retry = "Retry"
-    static let cancel = "Cancel"
-}
-
 extension HomeViewController: HomeDisplayLogic {
     func displayLoading() {
         isInitialLoading = true
@@ -128,7 +120,7 @@ extension HomeViewController: HomeDisplayLogic {
         if error.allowsRetry {
             alert.addAction(
                 UIAlertAction(
-                    title: Strings.retry,
+                    title: Strings.Common.retry,
                     style: .default
                 ) { [weak self] _ in
                     self?.interactor.retryInitialLoading()
@@ -137,7 +129,7 @@ extension HomeViewController: HomeDisplayLogic {
         }
         alert.addAction(
             UIAlertAction(
-                title: Strings.cancel,
+                title: Strings.Common.cancel,
                 style: .cancel
             )
         )
@@ -157,7 +149,7 @@ extension HomeViewController: HomeDisplayLogic {
         if error.allowsRetry {
             alert.addAction(
                 UIAlertAction(
-                    title: Strings.retry,
+                    title: Strings.Common.retry,
                     style: .default
                 ) { [weak self] _ in
                     self?.interactor.retryNextPage()
@@ -166,7 +158,7 @@ extension HomeViewController: HomeDisplayLogic {
         }
         alert.addAction(
             UIAlertAction(
-                title: Strings.cancel,
+                title: Strings.Common.cancel,
                 style: .cancel
             ) { [weak self] _ in
                 self?.interactor.dismissPaginationError()
@@ -261,9 +253,9 @@ extension HomeViewController: UISearchResultsUpdating {
 
 extension HomeViewController {
     func setupContent() {
-        title = Strings.screenTitle
-        searchController.searchBar.placeholder = Strings.searchPlaceholder
-        searchController.searchBar.accessibilityLabel = Strings.searchAccessibilityLabel
+        title = Strings.Home.title
+        searchController.searchBar.placeholder = Strings.Home.searchPlaceholder
+        searchController.searchBar.accessibilityLabel = Strings.Home.searchAccessibilityLabel
     }
 
     func setupSearchController() {

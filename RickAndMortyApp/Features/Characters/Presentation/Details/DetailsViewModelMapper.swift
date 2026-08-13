@@ -6,7 +6,7 @@ protocol DetailsViewModelMapping {
 }
 
 struct DetailsViewModelMapper: DetailsViewModelMapping {
-    private enum Strings {
+    private enum Status {
         static let alive = "alive"
         static let dead = "dead"
     }
@@ -34,9 +34,9 @@ struct DetailsViewModelMapper: DetailsViewModelMapping {
 
     private func statusColor(for status: String) -> UIColor {
         switch status.lowercased() {
-        case Strings.alive:
+        case Status.alive:
             return .systemGreen
-        case Strings.dead:
+        case Status.dead:
             return .systemRed
         default:
             return .systemGray

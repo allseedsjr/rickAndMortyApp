@@ -18,10 +18,6 @@ final class HomeView: UIView, HomeViewing, ViewCode {
         static let emptyStateHorizontalInset: CGFloat = 24
     }
 
-    private enum Strings {
-        static let characterNotFound = "No characters found."
-    }
-
     private var isLoading = false
     private var isSearchEmptyStateVisible = false
 
@@ -68,7 +64,7 @@ final class HomeView: UIView, HomeViewing, ViewCode {
     private let searchEmptyStateLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = Strings.characterNotFound
+        label.text = Strings.Home.searchEmptyState
         label.textColor = .secondaryLabel
         label.font = .preferredFont(forTextStyle: .body)
         label.textAlignment = .center
