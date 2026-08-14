@@ -23,8 +23,8 @@ final class HomeInteractor: HomeBusinessLogic {
     }
 
     private let getCharactersUseCase: any GetCharactersUseCasing
+    private let searchCharactersUseCase: any SearchCharactersUseCasing
     private let presenter: any HomePresentationLogic
-    private let searchFilter: any CharacterSearchFiltering
     private var paginationState: any HomePaginationStateHandling
     private var charactersTask: Task<Void, Never>?
     private var requestGeneration = 0
@@ -33,14 +33,14 @@ final class HomeInteractor: HomeBusinessLogic {
 
     init(
         getCharactersUseCase: any GetCharactersUseCasing,
+        searchCharactersUseCase: any SearchCharactersUseCasing,
         presenter: any HomePresentationLogic,
-        paginationState: any HomePaginationStateHandling,
-        searchFilter: any CharacterSearchFiltering
+        paginationState: any HomePaginationStateHandling
     ) {
         self.getCharactersUseCase = getCharactersUseCase
+        self.searchCharactersUseCase = searchCharactersUseCase
         self.presenter = presenter
         self.paginationState = paginationState
-        self.searchFilter = searchFilter
     }
 
     deinit {
@@ -142,7 +142,10 @@ final class HomeInteractor: HomeBusinessLogic {
     }
 
     private func presentFilteredCharacters() {
-        let filteredCharacters = searchFilter.filter(characters, by: searchQuery)
+        let filteredCharacters = searchCharactersUseCase.execute(
+            characters: characters,
+            query: searchQuery
+        )
         presenter.presentCharacters(filteredCharacters, query: searchQuery)
     }
 }

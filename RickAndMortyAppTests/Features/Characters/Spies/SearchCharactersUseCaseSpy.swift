@@ -1,13 +1,13 @@
 @testable import RickAndMortyApp
 
-final class CharacterSearchFilterSpy: CharacterSearchFiltering {
+final class SearchCharactersUseCaseSpy: SearchCharactersUseCasing {
     private(set) var receivedCharacters: [[Character]] = []
     private(set) var receivedQueries: [String] = []
     var result: [Character]?
 
-    func filter(
-        _ characters: [Character],
-        by query: String
+    func execute(
+        characters: [Character],
+        query: String
     ) -> [Character] {
         receivedCharacters.append(characters)
         receivedQueries.append(query)

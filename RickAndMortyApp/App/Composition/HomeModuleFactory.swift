@@ -48,9 +48,9 @@ enum HomeModuleFactory {
         )
         let interactor = HomeInteractor(
             getCharactersUseCase: useCase,
+            searchCharactersUseCase: SearchCharactersUseCase(),
             presenter: presenter,
-            paginationState: HomePaginationState(),
-            searchFilter: CharacterSearchFilter()
+            paginationState: HomePaginationState()
         )
         let viewController = HomeViewController(
             interactor: interactor,
