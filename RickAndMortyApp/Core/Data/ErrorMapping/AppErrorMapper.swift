@@ -10,6 +10,10 @@ struct AppErrorMapper: AppErrorMapping {
             return CancellationError()
         }
 
+        if let appError = error as? AppError {
+            return appError
+        }
+
         guard let networkError = error as? NetworkError else {
             return AppError.unknown
         }

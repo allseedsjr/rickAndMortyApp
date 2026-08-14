@@ -36,7 +36,8 @@ enum HomeModuleFactory {
         )
         let repository = CharactersRepositoryImpl(
             remoteDataSource: remoteDataSource,
-            cacheLoader: cacheLoader
+            cacheLoader: cacheLoader,
+            errorMapper: AppErrorMapper()
         )
         let useCase = GetCharactersUseCase(
             repository: repository

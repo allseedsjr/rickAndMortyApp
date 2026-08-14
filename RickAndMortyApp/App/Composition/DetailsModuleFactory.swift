@@ -30,7 +30,8 @@ enum DetailsModuleFactory {
         let remoteDataSource = EpisodeDataSource(apiClient: apiClient)
         let repository = EpisodeRepositoryImpl(
             remoteDataSource: remoteDataSource,
-            cacheLoader: episodeCacheLoader
+            cacheLoader: episodeCacheLoader,
+            errorMapper: AppErrorMapper()
         )
         let useCase = GetFirstSeenInUseCase(repository: repository)
         let presenter = DetailsPresenter(

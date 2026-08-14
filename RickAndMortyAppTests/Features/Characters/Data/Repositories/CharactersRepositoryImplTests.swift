@@ -5,9 +5,11 @@ import Testing
 final class CharactersRepositoryImplTests {
     private let remoteDataSourceSpy = CharacterDataSourceSpy()
     private let cacheLoaderSpy = CacheFirstLoaderSpy<CharacterResponseDTO>()
+    private let errorMapperSpy = AppErrorMapperSpy()
     private lazy var sut = CharactersRepositoryImpl(
         remoteDataSource: remoteDataSourceSpy,
-        cacheLoader: cacheLoaderSpy
+        cacheLoader: cacheLoaderSpy,
+        errorMapper: errorMapperSpy
     )
 
     @Test
@@ -43,11 +45,26 @@ final class CharactersRepositoryImplTests {
     }
 
     @Test
-    func testGetCharacters_WhenLoaderFails_PropagatesError() async {
-        cacheLoaderSpy.result = .failure(AppError.noConnection)
+    func testGetCharacters_WhenLoaderFails_MapsErrorToApplicationError() async {
+        cacheLoaderSpy.result = .failure(NetworkError.noConnection)
+        errorMapperSpy.result = AppError.noConnection
 
         await #expect(throws: AppError.noConnection) {
             try await sut.getCharacters(page: 1)
         }
+        #expect(errorMapperSpy.receivedErrors.count == 1)
+        #expect(errorMapperSpy.receivedErrors.first as? NetworkError == .noConnection)
+    }
+
+    @Test
+    func testGetCharacters_WhenAdditionalPageFails_MapsErrorToApplicationError() async {
+        remoteDataSourceSpy.result = .failure(NetworkError.timeout)
+        errorMapperSpy.result = AppError.timeout
+
+        await #expect(throws: AppError.timeout) {
+            try await sut.getCharacters(page: 2)
+        }
+        #expect(errorMapperSpy.receivedErrors.count == 1)
+        #expect(errorMapperSpy.receivedErrors.first as? NetworkError == .timeout)
     }
 }
