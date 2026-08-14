@@ -1,16 +1,16 @@
 import Foundation
 
-protocol CharacterSearchFiltering {
-    func filter(
-        _ characters: [Character],
-        by query: String
+protocol SearchCharactersUseCasing {
+    func execute(
+        characters: [Character],
+        query: String
     ) -> [Character]
 }
 
-struct CharacterSearchFilter: CharacterSearchFiltering {
-    func filter(
-        _ characters: [Character],
-        by query: String
+struct SearchCharactersUseCase: SearchCharactersUseCasing {
+    func execute(
+        characters: [Character],
+        query: String
     ) -> [Character] {
         let normalizedQuery = query.trimmingCharacters(
             in: .whitespacesAndNewlines

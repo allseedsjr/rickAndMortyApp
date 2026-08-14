@@ -5,14 +5,14 @@ import Testing
 @MainActor
 final class HomeInteractorTests {
     private let useCaseSpy = GetCharactersUseCaseSpy()
+    private let searchCharactersUseCaseSpy = SearchCharactersUseCaseSpy()
     private let presenterSpy = HomePresenterSpy()
     private let paginationStateSpy = HomePaginationStateSpy()
-    private let searchFilterSpy = CharacterSearchFilterSpy()
     private lazy var sut = HomeInteractor(
         getCharactersUseCase: useCaseSpy,
+        searchCharactersUseCase: searchCharactersUseCaseSpy,
         presenter: presenterSpy,
-        paginationState: paginationStateSpy,
-        searchFilter: searchFilterSpy
+        paginationState: paginationStateSpy
     )
 
     @Test
@@ -103,11 +103,11 @@ final class HomeInteractorTests {
     func testSearchCharacters_FiltersLoadedCharactersAndPresentsResult() async {
         useCaseSpy.result = .success(.fixture(characters: [.fixture(name: "Rick")]))
         await waitForCharacters { sut.loadInitialCharacters() }
-        searchFilterSpy.result = [.fixture(name: "Filtered Rick")]
+        searchCharactersUseCaseSpy.result = [.fixture(name: "Filtered Rick")]
 
         sut.searchCharacters(with: "  Rick  ")
 
-        #expect(searchFilterSpy.receivedQueries.last == "Rick")
+        #expect(searchCharactersUseCaseSpy.receivedQueries.last == "Rick")
         #expect(presenterSpy.presentedCharacters.last?.characters.first?.name == "Filtered Rick")
         #expect(presenterSpy.presentedCharacters.last?.query == "Rick")
     }
@@ -116,13 +116,13 @@ final class HomeInteractorTests {
     func testLoadNextPage_WithActiveSearch_PresentsCompleteFilteredResult() async {
         useCaseSpy.result = .success(.fixture(characters: [.fixture(id: 1)]))
         await waitForCharacters { sut.loadInitialCharacters() }
-        searchFilterSpy.result = [.fixture(name: "Filtered")]
+        searchCharactersUseCaseSpy.result = [.fixture(name: "Filtered")]
         sut.searchCharacters(with: "rick")
 
         await waitForCharacters { sut.loadNextPage() }
 
         #expect(presenterSpy.presentedAdditionalCharacters.isEmpty)
-        #expect(searchFilterSpy.receivedCharacters.last?.count == 2)
+        #expect(searchCharactersUseCaseSpy.receivedCharacters.last?.count == 2)
     }
 
     @Test

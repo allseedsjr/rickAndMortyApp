@@ -1,77 +1,77 @@
 import Testing
 @testable import RickAndMortyApp
 
-@Suite("CharacterSearchFilter")
-struct CharacterSearchFilterTests {
-    private let sut = CharacterSearchFilter()
+@Suite("SearchCharactersUseCase")
+struct SearchCharactersUseCaseTests {
+    private let sut = SearchCharactersUseCase()
 
     @Test
-    func testFilter_WhenQueryMatchesName_ReturnsMatchingCharacters() {
+    func testExecute_WhenQueryMatchesName_ReturnsMatchingCharacters() {
         let characters = [
             Character.fixture(name: "Rick Sanchez"),
             Character.fixture(name: "Morty Smith")
         ]
 
-        let result = sut.filter(characters, by: "rick")
+        let result = sut.execute(characters: characters, query: "rick")
 
         #expect(result.count == 1)
         #expect(result.first?.name == "Rick Sanchez")
     }
 
     @Test
-    func testFilter_WhenQueryHasDifferentCase_ReturnsMatchingCharacters() {
+    func testExecute_WhenQueryHasDifferentCase_ReturnsMatchingCharacters() {
         let characters = [Character.fixture(name: "Summer Smith")]
 
-        let result = sut.filter(characters, by: "SUMMER")
+        let result = sut.execute(characters: characters, query: "SUMMER")
 
         #expect(result.count == 1)
     }
 
     @Test
-    func testFilter_WhenQueryContainsSurroundingWhitespace_IgnoresWhitespace() {
+    func testExecute_WhenQueryContainsSurroundingWhitespace_IgnoresWhitespace() {
         let characters = [Character.fixture(name: "Beth Smith")]
 
-        let result = sut.filter(characters, by: "  Beth  ")
+        let result = sut.execute(characters: characters, query: "  Beth  ")
 
         #expect(result.count == 1)
     }
 
     @Test
-    func testFilter_WhenQueryIsEmpty_ReturnsAllCharacters() {
+    func testExecute_WhenQueryIsEmpty_ReturnsAllCharacters() {
         let characters = [
             Character.fixture(name: "Rick Sanchez"),
             Character.fixture(name: "Morty Smith")
         ]
 
-        let result = sut.filter(characters, by: "   ")
+        let result = sut.execute(characters: characters, query: "   ")
 
         #expect(result.count == 2)
     }
 
     @Test
-    func testFilter_WhenQueryDoesNotMatch_ReturnsEmptyList() {
+    func testExecute_WhenQueryDoesNotMatch_ReturnsEmptyList() {
         let characters = [Character.fixture(name: "Jerry Smith")]
 
-        let result = sut.filter(characters, by: "Birdperson")
+        let result = sut.execute(characters: characters, query: "Birdperson")
 
         #expect(result.isEmpty)
     }
 
     @Test
-    func testFilter_WhenCharactersAreEmpty_ReturnsEmptyList() {
-        let result = sut.filter([], by: "Rick")
+    func testExecute_WhenCharactersAreEmpty_ReturnsEmptyList() {
+        let result = sut.execute(characters: [], query: "Rick")
 
         #expect(result.isEmpty)
     }
 
     @Test
-    func testFilter_WhenQueryMatchesPartOfName_ReturnsMatchingCharacters() {
+    func testExecute_WhenQueryMatchesPartOfName_ReturnsMatchingCharacters() {
         let characters = [
             Character.fixture(name: "Evil Morty"),
             Character.fixture(name: "Jerry Smith")
         ]
 
-        let result = sut.filter(characters, by: "Mort")
+        let result = sut.execute(characters: characters, query: "Mort")
 
         #expect(result.count == 1)
         #expect(result.first?.name == "Evil Morty")
