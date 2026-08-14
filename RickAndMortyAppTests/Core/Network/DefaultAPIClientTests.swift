@@ -83,23 +83,14 @@ final class DefaultAPIClientTests {
         "testExecute_WhenStatusCodeIsNotSuccessful_ThrowsHTTPError",
         arguments: [199, 300, 400, 404, 500]
     )
-    func testExecute_WhenStatusCodeIsNotSuccessful_ThrowsMappedAppError(
+    func testExecute_WhenStatusCodeIsNotSuccessful_ThrowsHTTPError(
         _ statusCode: Int
     ) async {
         transportSpy.result = .success(
             HTTPResponse.fixture(statusCode: statusCode)
         )
 
-        let expectedError: AppError = switch statusCode {
-        case 404:
-            .notFound
-        case 500:
-            .serviceUnavailable
-        default:
-            .unknown
-        }
-
-        await #expect(throws: expectedError) {
+        await #expect(throws: NetworkError.http(statusCode: statusCode)) {
             try await sut.execute(APIRequestStub())
         }
     }
@@ -113,42 +104,34 @@ final class DefaultAPIClientTests {
             )
         )
 
-        await #expect(throws: AppError.invalidData) {
+        await #expect(throws: NetworkError.decoding) {
             try await sut.execute(APIRequestStub())
         }
     }
 
     @Test(
-        "testExecute_WhenTransportFails_ThrowsMappedAppError",
+        "testExecute_WhenTransportFails_PropagatesNetworkError",
         arguments: [
             NetworkError.timeout,
             .noConnection,
             .transport
         ]
     )
-    func testExecute_WhenTransportFails_ThrowsMappedAppError(
+    func testExecute_WhenTransportFails_PropagatesNetworkError(
         _ networkError: NetworkError
     ) async {
         transportSpy.result = .failure(networkError)
-        let expectedError: AppError = switch networkError {
-        case .timeout:
-            .timeout
-        case .noConnection:
-            .noConnection
-        default:
-            .unknown
-        }
 
-        await #expect(throws: expectedError) {
+        await #expect(throws: networkError) {
             try await sut.execute(APIRequestStub())
         }
     }
 
     @Test
-    func testExecute_WhenTransportIsCancelled_PreservesCancellation() async {
+    func testExecute_WhenTransportIsCancelled_PropagatesNetworkCancellation() async {
         transportSpy.result = .failure(NetworkError.cancelled)
 
-        await #expect(throws: CancellationError.self) {
+        await #expect(throws: NetworkError.cancelled) {
             try await sut.execute(APIRequestStub())
         }
     }
@@ -160,7 +143,7 @@ final class DefaultAPIClientTests {
             transport: transportSpy
         )
 
-        await #expect(throws: AppError.invalidData) {
+        await #expect(throws: NetworkError.invalidURL) {
             try await sut.execute(APIRequestStub())
         }
         #expect(transportSpy.receivedRequest == nil)

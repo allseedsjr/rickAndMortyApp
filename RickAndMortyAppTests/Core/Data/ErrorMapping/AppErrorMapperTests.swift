@@ -40,6 +40,11 @@ struct AppErrorMapperTests {
     }
 
     @Test
+    func testMap_WhenFailureIsAlreadyAnAppError_PreservesError() {
+        #expect(sut.map(AppError.timeout) as? AppError == .timeout)
+    }
+
+    @Test
     func testMap_WhenFailureIsUnknown_ReturnsUnknownAppError() {
         let result = sut.map(AppErrorMapperTestError.expected)
 

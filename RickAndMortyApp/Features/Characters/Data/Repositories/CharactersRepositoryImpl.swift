@@ -5,24 +5,31 @@ final class CharactersRepositoryImpl: CharacterRepositoryProtocol {
 
     private let remoteDataSource: CharacterDataSourceProtocol
     private let cacheLoader: any CacheFirstLoading<CharacterResponseDTO>
+    private let errorMapper: any AppErrorMapping
 
     init(
         remoteDataSource: CharacterDataSourceProtocol,
-        cacheLoader: any CacheFirstLoading<CharacterResponseDTO>
+        cacheLoader: any CacheFirstLoading<CharacterResponseDTO>,
+        errorMapper: any AppErrorMapping
     ) {
         self.remoteDataSource = remoteDataSource
         self.cacheLoader = cacheLoader
+        self.errorMapper = errorMapper
     }
 
     func getCharacters(page: Int) async throws -> CharactersPage {
-        guard page == 1 else {
-            let response = try await remoteDataSource.getCharacters(page: page)
-            return CharactersPage(dto: response)
-        }
+        do {
+            guard page == 1 else {
+                let response = try await remoteDataSource.getCharacters(page: page)
+                return CharactersPage(dto: response)
+            }
 
-        let response = try await cacheLoader.load(key: CacheKey.firstPage) {
-            try await remoteDataSource.getCharacters(page: page)
+            let response = try await cacheLoader.load(key: CacheKey.firstPage) {
+                try await remoteDataSource.getCharacters(page: page)
+            }
+            return CharactersPage(dto: response)
+        } catch {
+            throw errorMapper.map(error)
         }
-        return CharactersPage(dto: response)
     }
 }

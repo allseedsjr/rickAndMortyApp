@@ -5,9 +5,11 @@ import Testing
 final class EpisodeRepositoryImplTests {
     private let remoteDataSourceSpy = EpisodeDataSourceSpy()
     private let cacheLoaderSpy = CacheFirstLoaderSpy<EpisodeDTO>()
+    private let errorMapperSpy = AppErrorMapperSpy()
     private lazy var sut = EpisodeRepositoryImpl(
         remoteDataSource: remoteDataSourceSpy,
-        cacheLoader: cacheLoaderSpy
+        cacheLoader: cacheLoaderSpy,
+        errorMapper: errorMapperSpy
     )
 
     @Test
@@ -34,11 +36,14 @@ final class EpisodeRepositoryImplTests {
     }
 
     @Test
-    func testGetEpisode_WhenLoaderFails_PropagatesError() async {
-        cacheLoaderSpy.result = .failure(AppError.timeout)
+    func testGetEpisode_WhenLoaderFails_MapsErrorToApplicationError() async {
+        cacheLoaderSpy.result = .failure(NetworkError.timeout)
+        errorMapperSpy.result = AppError.timeout
 
         await #expect(throws: AppError.timeout) {
             try await sut.getEpisode(id: 1)
         }
+        #expect(errorMapperSpy.receivedErrors.count == 1)
+        #expect(errorMapperSpy.receivedErrors.first as? NetworkError == .timeout)
     }
 }
